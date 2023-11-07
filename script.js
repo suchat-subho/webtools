@@ -28,8 +28,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             cell.appendChild(link);
                         } else if(cellKey === 'ShortURL'){
                             const link = document.createElement('a');
-                            link.href = "https://subhrendu1987.github.io/redir?url="+rowData[cellKey];
-                            link.textContent = "https://subhrendu1987.github.io/redir?url="+rowData[cellKey];
+                            URI= window.location.href;
+                            link.href = URI+"?url="+rowData[cellKey];
+                            link.textContent = URI+"?url="+rowData[cellKey];
                             cell.appendChild(link);
                         } else {
                             cell.textContent = rowData[cellKey];
@@ -41,9 +42,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-            alert(error.message); // Display an alert with the error message
+            console.log(error.message); // Display an alert with the error message
         })
         .finally(() => {
-            //alert('Code execution is over.'); // Display an alert once code execution is complete
+            //console.log('Code execution is over.'); // Display an alert once code execution is complete
         });
 });
