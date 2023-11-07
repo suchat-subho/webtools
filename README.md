@@ -1,3 +1,6 @@
+# Free URL Redirection in Github
+This repo provides short URL like feature with Github pages, Google sheets and Google app scripts
+
 # Directory Structure and File descriptions
 ```````````````````````````````````````
 ├── GoogleSheetsToJson.gs 	(Google App script to generate JSON from google sheets and provide REST response. Usage direction is inside the file.)
