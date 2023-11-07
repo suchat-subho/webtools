@@ -19,6 +19,10 @@ Deploy the Web App:
     Click "Deploy" and review and accept the permissions.
 Access the JSON Data:
     After deploying the web app, you'll receive a URL. Open this URL in your web browser, and it will return the JSON data.
+    Use the same URL in index.html line # 73
+        e.g. const jsonURL = 'https://script.googleusercontent.com/macros/echo?user_content_key=-.....';
+    Add the google sheet URL in Line # 115
+        e.g. <a href="https://docs.google.com/spreadsheets/d/1KL-Azsg_x2LUYTzNSQTgU5Kz_oQd1yWsqW6JD3ayf9g/edit#gid=0">URL DB </a>
 */
 
 function doGet() {
