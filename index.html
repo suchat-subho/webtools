@@ -80,7 +80,7 @@
             return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
         }
         var body = document.body;
-        body.innerHTML = '<div class="loading-container"><div class="loading-message">Please wait ...</div><div class="loader"></div></div>';
+        body.innerHTML = '<div class="loading-container"><div class="loading-message">  Please wait ...  </div><div class="loader"></div></div>';
         // Get the value from the URL
         var value = getURLParameter('url');
         //alert("ShortURL="+(""+value).length);
@@ -104,11 +104,12 @@
                 });
         }else{
             document.title = 'List of Short URLs';
-            body.innerHTML = '<table id="data-table" border="1"><thead><tr><th>Filename</th><th>Actual URL</th><th>ShortURL</th></tr></thead><tbody></tbody></table>';
+            body.innerHTML = '<table id="data-table" border="1"><thead><tr><th>Description</th><th>Actual URL</th><th>ShortURL</th></tr></thead><tbody></tbody></table>';
             var table = document.getElementById('data-table');
             table.style.display = 'block';
             //alert("Show Links table");
         }
+        //document.getElementById('loading-message').style.display = 'none';
     </script>
     
     <script src="script.js"></script>
