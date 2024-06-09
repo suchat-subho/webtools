@@ -20,20 +20,26 @@
 }
 
 .container {
-    max-width: 800px;
+    max-width: 80%;
     margin: 20px auto;
     padding: 20px;
     background-color: #f1f1f1;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);    
+    display: flex; /* Use flexbox */
+    flex-wrap: wrap; /* Wrap the items to next line if there's not enough space */
+    gap: 20px; /* Add space between the note divs */
+    justify-content: space-between; /* Distribute items evenly along the main axis */
 }
 
 .note {
+    flex: 0 0 calc(10% - 20px); /* Set flex basis to 50% minus the gap */
     background-color: white;
     border: 1px solid #ccc;
     border-radius: 5px;
     padding: 15px;
     margin-bottom: 10px;
+    max-width: 30%;
 }
 
 .note h3 {
@@ -46,6 +52,7 @@
 
 .note em {
     font-style: italic;
+    color: #207c9e;
 }
 
 .note a.button {
@@ -59,4 +66,29 @@
 
 .note .short-url-icon {
     /* Adjust font size, color, etc. as needed */
+}
+
+
+.sidebar {
+    width: 20%; /* Set the width of the sidebar */
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin-bottom: 10px;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: #333;
+}
+
+.sidebar ul li a:hover {
+    color: #007BFF;
 }
