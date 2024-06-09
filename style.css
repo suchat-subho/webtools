@@ -20,7 +20,7 @@
     100% { transform: rotate(360deg); }
 }
 body {
-    background-color: black;
+    background-color: #adada6;
     color: white;
     font-family: Arial, sans-serif;
     margin: 20px;
