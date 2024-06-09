@@ -2,6 +2,7 @@ const webAppURL = 'https://script.googleusercontent.com/macros/echo?user_content
 
 document.addEventListener('DOMContentLoaded', function() {
     const notesContainer = document.getElementById('notes-container');
+    const sideNav = document.getElementById('sidenav');
 
     fetch(webAppURL)
         .then(response => {
@@ -17,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const noteData = data[key];
                     const note = document.createElement('div');
                     note.className = 'note';
+                    //note.id="${noteData.ShortURL}"
                     shortURI = URI + "?url=" + noteData.ShortURL;
                     note.innerHTML = `
                         <h3>${noteData.Description}</h3>
@@ -25,6 +27,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         <p><strong>Link for Short URL:</strong> <a href="${shortURI}" target="_blank" class="button">Go to Short URL</a></p>
                     `;
                     notesContainer.appendChild(note);
+                    //const nav = document.createElement('li');
+                    //nav.innerHTML=`<li><a href="#${noteData.ShortURL}">${noteData.Description}</a></li>`;
+                    //sidenav.appendChild(nav);
                 }
             }
         })
