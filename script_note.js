@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     //note.id="${noteData.ShortURL}"
                     shortURI = URI + "?url=" + noteData.ShortURL;
                     if(key==""){
-                        note.innerHTML = ``;
+                        note.innerHTML = `<h3>BLANK</h3>`;
                     }else{
                         note.innerHTML = `
                             <h3>${noteData.Description}</h3>
