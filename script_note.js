@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     //note.id="${noteData.ShortURL}"
                     shortURI = URI + "?url=" + noteData.ShortURL;
                     if(key==""){
+                        // Ignore blank keys
                         note.innerHTML = `<h3>BLANK</h3>`;
                     }else{
                         note.innerHTML = `
