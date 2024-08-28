@@ -33,14 +33,24 @@
 }
 
 .note {
-    flex: 0 0 calc(10% - 20px); /* Set flex basis to 50% minus the gap */
+    flex: 1 1 calc(33.333% - 20px); /* Adjusted flex basis */
     background-color: white;
     border: 1px solid #ccc;
     border-radius: 5px;
     padding: 15px;
-    margin-bottom: 10px;
-    max-width: 30%;
+    margin: 10px; /* Adjust margin to handle gaps */
+    box-sizing: border-box; /* Ensure padding and border are included in width */
+    overflow: hidden; /* Prevent overflow from child elements */
 }
+
+.note p, .note h3 {
+    word-wrap: break-word; /* Break long words */
+}
+
+.note a {
+    word-break: break-all; /* Break long URLs */
+}
+
 
 .note h3 {
     margin: 0 0 10px 0;
