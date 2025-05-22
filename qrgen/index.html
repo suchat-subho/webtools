@@ -33,7 +33,7 @@
 </head>
 <body>
   <h2>QR Code Generator</h2>
-  <input type="text" id="urlInput" placeholder="Enter URL here" size="50">
+  <!--input type="text" id="urlInput" placeholder="Enter URL here" size="50"-->
   <button onclick="generateQRCode()">Generate QR Code</button>
   <br><br>
   <canvas id="qrcodeCanvas"></canvas><br>
@@ -50,7 +50,7 @@
       //const urlToEncode = getQueryParam('data');
       const statusText = document.getElementById('status');
       if (!url) {
-        statusText.textContent = "Please enter a valid URL.";
+        statusText.textContent = "Please enter a valid URL. (e.g. add \"?data=https://subhrendu1987.github.io\"";
         return;
       }
 
