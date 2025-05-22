@@ -6,7 +6,6 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>QR Code Generator</title>
-  <!--script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script-->
   <script src="scripts/qrcode.min.js"></script>
   <style>
     body {
@@ -19,6 +18,8 @@
       border: 2px solid #333;
       padding: 10px;
       background: #fff;
+      display: block;
+      margin: 10px auto;
     }
 
     #status {
@@ -33,38 +34,53 @@
 </head>
 <body>
   <h2>QR Code Generator</h2>
-  <!--input type="text" id="urlInput" placeholder="Enter URL here" size="50"-->
   <button onclick="generateQRCode()">Generate QR Code</button>
   <br><br>
-  <canvas id="qrcodeCanvas"></canvas><br>
+  <canvas id="qrcodeCanvas" width="256" height="256"></canvas>
+  <canvas id="textCanvas" width="256" height="40"></canvas>
   <p id="status"></p>
+
   <script>
     function getQueryParam(name) {
       const params = new URLSearchParams(window.location.search);
       return params.get(name);
     }
+
+    function drawTextToCanvas(canvas, text) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.font = "14px sans-serif";
+      ctx.fillStyle = "#000";
+      ctx.textAlign = "center";
+
+      const displayText = text.length > 40 ? text.slice(0, 37) + "..." : text;
+      ctx.fillText(displayText, canvas.width / 2, 25);
+    }
+
     function generateQRCode() {
-      //const url = document.getElementById('urlInput').value;
       const url = getQueryParam('data');
-      const canvas = document.getElementById('qrcodeCanvas');
-      //const urlToEncode = getQueryParam('data');
+      const qrCanvas = document.getElementById('qrcodeCanvas');
+      const textCanvas = document.getElementById('textCanvas');
       const statusText = document.getElementById('status');
+
       if (!url) {
-        statusText.textContent = "Please enter a valid URL. (e.g. add \"?data=https://subhrendu1987.github.io\"";
+        statusText.textContent = "Please enter a valid URL. (e.g. add \"?data=https://subhrendu1987.github.io\")";
         return;
       }
 
-      QRCode.toCanvas(canvas, url, function (error) {
+      QRCode.toCanvas(qrCanvas, url, function (error) {
         if (error) {
           console.error(error);
           statusText.textContent = "Failed to generate QR code.";
-        }else{
+        } else {
           statusText.textContent = url;
+          drawTextToCanvas(textCanvas, url);
         }
       });
     }
+
     window.addEventListener('DOMContentLoaded', generateQRCode);
   </script>
 </body>
 </html>
-
