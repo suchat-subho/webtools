@@ -48,15 +48,18 @@
       const url = getQueryParam('data');
       const canvas = document.getElementById('qrcodeCanvas');
       //const urlToEncode = getQueryParam('data');
+      const statusText = document.getElementById('status');
       if (!url) {
-        alert("Please enter a URL.");
+        statusText.textContent = "Please enter a valid URL.";
         return;
       }
 
       QRCode.toCanvas(canvas, url, function (error) {
         if (error) {
           console.error(error);
-          alert("Failed to generate QR code.");
+          statusText.textContent = "Failed to generate QR code.";
+        }else{
+          statusText.textContent = url;
         }
       });
     }
