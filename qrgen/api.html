@@ -33,11 +33,7 @@
   </style>
 </head>
 <body>
-  <h2>QR Code Generator</h2>
-  <button onclick="generateQRCode()">Generate QR Code</button>
-  <br><br>
   <canvas id="qrcodeCanvas" width="256" height="256"></canvas>
-  <canvas id="textCanvas" width="256" height="290"></canvas>
   <p id="status"></p>
 
   <script>
@@ -46,41 +42,9 @@
       return params.get(name);
     }
 
-    function drawQRWithText(canvas, url) {
-      const ctx = canvas.getContext('2d');
-      const qrSize = 256;
-      const totalHeight = canvas.height;
-      const textY = qrSize + 24;
-
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Create temporary canvas for QR generation
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = qrSize;
-      tempCanvas.height = qrSize;
-
-      QRCode.toCanvas(tempCanvas, url, function (error) {
-        if (error) {
-          console.error("Error generating QR for text canvas:", error);
-        } else {
-          // Draw QR onto combined canvas
-          ctx.drawImage(tempCanvas, 0, 0);
-
-          // Draw text
-          ctx.font = "14px sans-serif";
-          ctx.fillStyle = "#000";
-          ctx.textAlign = "center";
-          const displayText = url.length > 40 ? url.slice(0, 37) + "..." : url;
-          ctx.fillText(displayText, canvas.width / 2, textY);
-        }
-      });
-    }
-
     function generateQRCode() {
       const url = getQueryParam('data');
       const qrCanvas = document.getElementById('qrcodeCanvas');
-      const textCanvas = document.getElementById('textCanvas');
       const statusText = document.getElementById('status');
 
       if (!url) {
@@ -97,9 +61,6 @@
           statusText.textContent = url;
         }
       });
-
-      // QR + text canvas
-      drawQRWithText(textCanvas, url);
     }
 
     window.addEventListener('DOMContentLoaded', generateQRCode);
