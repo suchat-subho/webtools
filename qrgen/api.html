@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>QR Code Generator</title>
+  <script src="scripts/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding-top: 50px;
+    }
+
+    canvas {
+      border: 2px solid #333;
+      padding: 10px;
+      background: #fff;
+      display: block;
+      margin: 10px auto;
+    }
+
+    #status {
+      margin-top: 20px;
+      padding: 10px;
+      border: 2px dashed #007BFF;
+      display: inline-block;
+      background-color: #f0f8ff;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h2>QR Code Generator</h2>
+  <button onclick="generateQRCode()">Generate QR Code</button>
+  <br><br>
+  <canvas id="qrcodeCanvas" width="256" height="256"></canvas>
+  <canvas id="textCanvas" width="256" height="290"></canvas>
+  <p id="status"></p>
+
+  <script>
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    function drawQRWithText(canvas, url) {
+      const ctx = canvas.getContext('2d');
+      const qrSize = 256;
+      const totalHeight = canvas.height;
+      const textY = qrSize + 24;
+
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Create temporary canvas for QR generation
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = qrSize;
+      tempCanvas.height = qrSize;
+
+      QRCode.toCanvas(tempCanvas, url, function (error) {
+        if (error) {
+          console.error("Error generating QR for text canvas:", error);
+        } else {
+          // Draw QR onto combined canvas
+          ctx.drawImage(tempCanvas, 0, 0);
+
+          // Draw text
+          ctx.font = "14px sans-serif";
+          ctx.fillStyle = "#000";
+          ctx.textAlign = "center";
+          const displayText = url.length > 40 ? url.slice(0, 37) + "..." : url;
+          ctx.fillText(displayText, canvas.width / 2, textY);
+        }
+      });
+    }
+
+    function generateQRCode() {
+      const url = getQueryParam('data');
+      const qrCanvas = document.getElementById('qrcodeCanvas');
+      const textCanvas = document.getElementById('textCanvas');
+      const statusText = document.getElementById('status');
+
+      if (!url) {
+        statusText.textContent = 'Please enter a valid URL. (e.g. ?data=https://subhrendu1987.github.io)';
+        return;
+      }
+
+      // QR-only canvas
+      QRCode.toCanvas(qrCanvas, url, function (error) {
+        if (error) {
+          console.error(error);
+          statusText.textContent = "Failed to generate QR code.";
+        } else {
+          statusText.textContent = url;
+        }
+      });
+
+      // QR + text canvas
+      drawQRWithText(textCanvas, url);
+    }
+
+    window.addEventListener('DOMContentLoaded', generateQRCode);
+  </script>
+</body>
+</html>
