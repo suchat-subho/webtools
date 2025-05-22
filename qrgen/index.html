@@ -60,8 +60,8 @@
         tempCanvas.width = 256;
         tempCanvas.height = 256;
       }
-
-      QRCode.toCanvas(canvas, url, function (error) {
+      QRCode.toCanvas(tempCanvas, urlToEncode, function (error){
+      //QRCode.toCanvas(canvas, url, function (error) {
         if (error) {
           console.error(error);
           statusText.textContent = "Failed to generate QR code.";
