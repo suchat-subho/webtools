@@ -37,6 +37,7 @@
   <button onclick="generateQRCode()">Generate QR Code</button>
   <br><br>
   <canvas id="qrcodeCanvas"></canvas><br>
+  <canvas id="tempCanvas"></canvas><br>
   <p id="status"></p>
   <script>
     function getQueryParam(name) {
@@ -50,13 +51,15 @@
       const statusText = document.getElementById('status');
       const canvas = document.getElementById('qrcodeCanvas');
       const ctx = canvas.getContext('2d');
+      const tempCanvas=document.getElementById('tempCanvas');
+
 
 
       if (!url) {
         statusText.textContent = "Please enter a valid URL. (e.g. add \"?data=https://subhrendu1987.github.io\"";
         return;
       }else{
-        const tempCanvas = document.createElement('canvas');
+        //const tempCanvas = document.createElement('canvas');
         tempCanvas.width = 256;
         tempCanvas.height = 256;
       }
