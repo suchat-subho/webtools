@@ -37,7 +37,6 @@
   <button onclick="generateQRCode()">Generate QR Code</button>
   <br><br>
   <canvas id="qrcodeCanvas"></canvas><br>
-  <canvas id="tempCanvas"></canvas><br>
   <p id="status"></p>
   <script>
     function getQueryParam(name) {
@@ -48,41 +47,19 @@
       //const url = document.getElementById('urlInput').value;
       const url = getQueryParam('data');
       const canvas = document.getElementById('qrcodeCanvas');
+      //const urlToEncode = getQueryParam('data');
       const statusText = document.getElementById('status');
-      const ctx = canvas.getContext('2d');
-      const tempCanvas=document.getElementById('tempCanvas');
-
-
-
       if (!url) {
         statusText.textContent = "Please enter a valid URL. (e.g. add \"?data=https://subhrendu1987.github.io\"";
         return;
-      }else{
-        //const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = 256;
-        tempCanvas.height = 256;
       }
-      QRCode.toCanvas(tempCanvas, urlToEncode, function (error){
-      //QRCode.toCanvas(canvas, url, function (error) {
+
+      QRCode.toCanvas(canvas, url, function (error) {
         if (error) {
           console.error(error);
           statusText.textContent = "Failed to generate QR code.";
         }else{
           statusText.textContent = url;
-          // Clear original canvas
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-          // Draw QR code
-          ctx.drawImage(tempCanvas, 0, 0);
-
-          // Draw text below QR code
-          ctx.font = "14px sans-serif";
-          ctx.fillStyle = "#000";
-          ctx.textAlign = "center";
-
-          const wrappedText = urlToEncode.length > 40 ? urlToEncode.substring(0, 37) + "...": urlToEncode;
-          ctx.fillText(wrappedText, canvas.width / 2, 276); // Adjust Y for text baseline
-
         }
       });
     }
