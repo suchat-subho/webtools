@@ -46,7 +46,8 @@
     function generateQRCode() {
       const url = document.getElementById('urlInput').value;
       const canvas = document.getElementById('qrcodeCanvas');
-
+      const urlToEncode = getQueryParam('data');
+      alert(urlToEncode);
       if (!url) {
         alert("Please enter a URL.");
         return;
