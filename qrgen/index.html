@@ -44,10 +44,10 @@
       return params.get(name);
     }
     function generateQRCode() {
-      const url = document.getElementById('urlInput').value;
+      //const url = document.getElementById('urlInput').value;
+      const url = getQueryParam('data');
       const canvas = document.getElementById('qrcodeCanvas');
-      const urlToEncode = getQueryParam('data');
-      alert(urlToEncode);
+      //const urlToEncode = getQueryParam('data');
       if (!url) {
         alert("Please enter a URL.");
         return;
