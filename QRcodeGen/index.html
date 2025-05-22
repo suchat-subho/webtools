@@ -2,9 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>QR Code Generator</title>
   <!--script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script-->
   <script src="scripts/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding-top: 50px;
+    }
+
+    canvas {
+      border: 2px solid #333;
+      padding: 10px;
+      background: #fff;
+    }
+
+    #status {
+      margin-top: 20px;
+      padding: 10px;
+      border: 2px dashed #007BFF;
+      display: inline-block;
+      background-color: #f0f8ff;
+      color: #333;
+    }
+  </style>
 </head>
 <body>
   <h2>QR Code Generator</h2>
@@ -12,8 +37,12 @@
   <button onclick="generateQRCode()">Generate QR Code</button>
   <br><br>
   <canvas id="qrcodeCanvas"></canvas>
-
+  <p id="status"></p>
   <script>
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
     function generateQRCode() {
       const url = document.getElementById('urlInput').value;
       const canvas = document.getElementById('qrcodeCanvas');
