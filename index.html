@@ -1,64 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <link rel="apple-touch-icon" sizes="180x180" href="favicon_io/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon_io/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon_io/favicon-16x16.png">
     <link rel="manifest" href="favicon_io/site.webmanifest">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>List of Short URLs</title>
-    <link rel="stylesheet" href="path/to/fontawesome.min.css">
-    <link rel="stylesheet" href="styles_note.css">
+    <title>My Courses</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<!----------------------------------------------------------------------->
 <body>
-    <script>
-        const jsonURL = 'https://script.googleusercontent.com/macros/echo?user_content_key=-nf7HtnAq_0htG1VeTn-eIqjG7DG2zmJVAB9hWC3ghXihLe0aPd4Z5uHfso8dyf3px8_s0aqadWfwTLmhpF3F8T4JLVykrupm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnBgmdpr5BW5TgBjlEPPDofIM2_kNrBC71ajuEfM6JLC4DUaHCjcXJ17FzCh84gbx3gVxNwEBAPUaEcM9aEljYTZS6Ic6skGQNdz9Jw9Md8uu&lib=MiS8nA0IP1S5-p0rxnHc8P-ZNomVPhu3r';
+    <center><h1> List of Useful Tools </h1></center>
+    <div class="ticker-box">
+        <a href="https://subhrendu1987.github.io/" target="_blank">Instructor Profile</a>
+    </div>
 
-        // Function to extract the URL parameter by name
-        function getURLParameter(name) {
-            name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]');
-            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-            var results = regex.exec(location.search);
-            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-        }
-        var body = document.body;
-        body.innerHTML = '<div class="loading-container"><div class="loading-message">  Please wait ...  </div><div class="loader"></div></div>';
-        // Get the value from the URL
-        var value = getURLParameter('url');
-        //alert("ShortURL="+(""+value).length);
-        if((""+value).length != 0){
-            // Fetch the JSON data
-            fetch(jsonURL)
-                .then(response => response.json())
-                .then(redirectMap => {
-                    if (redirectMap.hasOwnProperty(value)) {
-                        var URL = redirectMap[value].URL;
-                        // Redirect to the URL based on the value
-                        window.location.href = URL;
-                        //alert(value+" -> "+URL);
-                    } else {
-                        alert('No matching URL for the value: ' + value);
-                    }
-                })
-                .catch(error => {
-                    alert("Error:"+error.message);
-                });
-        }else{
-            document.title = 'List of Short URLs';
-            body.innerHTML = '<center><div class="container" id="notes-header"> <h1>List of Short-URLs</h1></div></center> <div class="container" id="notes-container"></div> <div class="sidebar"><ul id="sidenav"></ul></div>'
-        }
-        //document.getElementById('loading-message').style.display = 'none';
-    </script>
-<!----------------------------------------------------------------------->
-
-<!----------------------------------------------------------------------->
-<script src="script_note.js"></script>
-<center>
-    <a href="https://docs.google.com/spreadsheets/d/1KL-Azsg_x2LUYTzNSQTgU5Kz_oQd1yWsqW6JD3ayf9g/" target="_blank">
-        <img src="icon/sheet_icon.webp" alt="Google Sheets" style="width: 10px; height: 10px;">
-    </a>
-</center>
+    <div class="course-group">
+        <div class="course-grid-wrapper">
+            <!------------------------------------>
+            <div class="keep-container">
+                <div class="course-note">
+                    <h2>QR Code Generator</h2>
+                    <p>Useful tool to generate QR codes using webpage</p>
+                    <a href="https://suchat-subho.github.io/webtools/qrgen/">Open Tool</a>
+                </div>
+            </div>
+            <!------------------------------------>
+        </div>
+    </div>
 </body>
 </html>
