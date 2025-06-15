@@ -1,0 +1,236 @@
+/* General Body and Typography */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    text-align: center; /* Centers the main heading and ticker box */
+    color: #333; /* Default text color */
+}
+
+/* Header */
+h1 {
+    color: #333;
+    font-size: 28px;
+    margin-top: 20px; /* Adjusted for spacing */
+    margin-bottom: 30px; /* Space below the heading */
+}
+
+/* Ticker Box */
+.ticker-box {
+    display: inline-block; /* Allows centering with text-align on body */
+    padding: 10px 20px;
+    background: rgb(252, 186, 3); /* Orange background */
+    color: #121212; /* Dark text for contrast */
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(252, 186, 3, 0.8);
+    animation: ticker 3s infinite;
+    margin: 20px auto; /* Centers the block itself */
+    max-width: 800px; /* Limits width on larger screens */
+}
+
+.ticker-box a {
+    text-decoration: none;
+    color: #121212; /* Link color inside ticker box */
+}
+
+.ticker-box a:hover {
+    text-decoration: underline;
+}
+
+/* Ticker Animation */
+@keyframes ticker {
+    0% { opacity: 0.5; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0.5; transform: scale(0.9); }
+}
+
+/* Horizontal Rule */
+hr {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 40px auto; /* Provides space above and below the line */
+    max-width: 800px;
+}
+
+/* --- */
+
+/* NEW: Course Group Styling */
+.course-group {
+    margin-bottom: 50px; /* Space between different course groups */
+    padding: 20px 0; /* Optional: adds a bit of vertical padding around the group */
+}
+
+.course-group h2 {
+    color: #0056b3; /* A nice blue for group headings */
+    font-size: 2em; /* Larger font size for group headings */
+    margin-bottom: 30px; /* Space below the group heading */
+    text-align: center; /* Center the group heading */
+}
+
+
+/* Course Grid Wrapper (Flex Container) */
+.course-grid-wrapper {
+    display: flex; /* Enables flexbox */
+    flex-wrap: wrap; /* **Crucial:** Allows items to wrap to the next line */
+    justify-content: center; /* Centers items horizontally within the wrapper */
+    gap: 20px; /* Provides space between items (both row and column gaps) */
+    padding: 20px; /* Padding around the entire grid */
+    max-width: 1200px; /* Limit the maximum width of the grid */
+    margin: 0 auto; /* Center the grid on the page */
+}
+
+/* Individual Course Cards (Flex Items) */
+.keep-container {
+    flex: 1 1 300px; /* grow, shrink, basis */
+    min-width: 280px; /* Ensure cards don't get too small */
+    max-width: 400px; /* Prevent cards from becoming excessively wide */
+    background: linear-gradient(to right, #444, #222); /* Dark gradient background */
+    border-radius: 8px;
+    border: 2px solid #FCBA03; /* Orange border */
+    color: #fff; /* White text for dark background */
+    padding: 20px;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    overflow: hidden; /* Ensures content doesn't spill out */
+    box-sizing: border-box; /* Include padding and border in the element's total width */
+
+    display: flex;
+    flex-direction: column; /* Stack content vertically within the card */
+}
+
+.keep-container:hover {
+    transform: scale(1.05);
+    box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Inner content of course card */
+.course-note {
+    flex-grow: 1; /* Allows the course-note content to take up available space */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Pushes content and "Go to Course" link to ends */
+}
+
+/* Course Titles inside cards */
+.course-note h2 {
+    font-size: 1.5em; /* Using relative unit for better scalability */
+    color: #FCBA03; /* Orange title color */
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+/* Course Description */
+.course-note p {
+    font-size: 0.95em;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+/* Course List */
+.course-list {
+    list-style: none; /* Remove default list bullets */
+    padding: 0;
+    margin-top: auto; /* Pushes list to the bottom, above the link */
+    margin-bottom: 15px;
+}
+
+.course-list li {
+    position: relative; /* For custom bullet point */
+    padding-left: 20px; /* Space for custom bullet */
+    font-size: 0.85em; /* Smaller font size */
+    margin-bottom: 5px; /* Space between list items */
+}
+
+.course-list li::before {
+    content: '•'; /* Custom bullet point */
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: lightblue; /* Custom bullet color */
+}
+
+.course-list li:last-child {
+    margin-bottom: 0; /* No bottom margin for the last list item */
+}
+
+/* Highlighted Status */
+.highlight {
+    font-weight: bold;
+    color: white; /* Text color for highlight */
+    background-color: #28a745; /* Green background for ongoing */
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block; /* Ensures padding/background applies correctly */
+    margin-left: 5px; /* Little space from the year */
+}
+
+/* Course Links/Buttons */
+.course-note a {
+    display: inline-block; /* Makes the link behave like a block element for padding */
+    background-color: #007bff; /* Blue button background */
+    color: white;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    margin-top: 15px; /* Space above the button */
+    align-self: flex-start; /* Aligns the link to the start of the card's main axis */
+}
+
+.course-note a:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* --- */
+
+/* Responsive Design Adjustments */
+
+/* For screens up to 1024px (laptops, large tablets) */
+@media (max-width: 1024px) {
+    .course-grid-wrapper {
+        padding: 15px;
+        gap: 15px; /* Adjusted gap for smaller screens */
+    }
+    .keep-container {
+        flex-basis: calc(50% - 15px);
+        max-width: calc(50% - 15px);
+    }
+}
+
+/* For screens up to 768px (tablets in portrait) */
+@media (max-width: 768px) {
+    .course-grid-wrapper {
+        justify-content: center;
+    }
+    .keep-container {
+        flex-basis: 90%;
+        max-width: 90%;
+    }
+    .ticker-box {
+        margin: 15px;
+        padding: 8px 15px;
+    }
+    .course-group h2 {
+        font-size: 1.8em; /* Slightly smaller on tablets */
+    }
+}
+
+/* For screens up to 480px (mobile phones) */
+@media (max-width: 480px) {
+    .keep-container {
+        flex-basis: calc(100% - 40px); /* Account for 20px padding on each side of wrapper */
+        max-width: calc(100% - 40px);
+        min-width: unset;
+    }
+    .course-group h2 {
+        font-size: 1.5em; /* Smaller on mobile */
+    }
+}
+
+
