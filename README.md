@@ -1,10 +1,9 @@
 # Free URL Redirection in Github
-This repo provides short URL like feature with Github pages, Google sheets and Google app scripts
+This repo for implementing QR code gneration from a given URL
 
-# Directory Structure and File descriptions
-```````````````````````````````````````
-├── GoogleSheetsToJson.gs 	(Google App script to generate JSON from google sheets and provide REST response. Usage direction is inside the file.)
-├── index.html 				(Main HTML page for redirection)
-├── script.js 				(Gets value from URL and redirects. Otherwise, Shows the complete table from JSON.)
-├── GoogleSheetFormat.png	(Sample google sheet format screenshot)
-```````````````````````````````````````
+# How to use?
+* Method 1
+	- Use the URL [https://suchat-subho.github.io/webtools/qrgen/]
+	- Fill up the URL box and press 'Generate QR Code' button
+* Method 2 (REST API)
+	- Use the URL [https://suchat-subho.github.io/webtools/qrgen/api] + ?data=<TARGET URL> (e.g. [https://suchat-subho.github.io/webtools/qrgen/api/?data=https://subhrendu1987.github.io] )
