@@ -60,7 +60,7 @@
 	 <canvas id="qrcodeCanvas" width="256" height="256"></canvas>
 	 <p id="status"></p>
 	 <a id="download-link" href="#" download="qrcode.jpg">Download QR Code as JPG</a>
-
+   <img id="qrcodejpg" width="256" height="256"></img>
 	 <script>
 	 	 function getQueryParam(name) {
 	 	 	 const params = new URLSearchParams(window.location.search);
@@ -68,14 +68,15 @@
 	 	 }
 
 	 	 // New function to handle the download logic
-	 	 function downloadCanvasAsJpg(canvas, downloadLink) {
+	 	 function CanvasToJpg(canvas, downloadLink) {
 	 	 	 // Convert canvas to a JPG data URL
 	 	 	 const jpgDataUrl = canvas.toDataURL('image/jpeg', 0.9); // 0.9 for quality
 	 	 	 //alert("jpgdataURL="+jpgDataUrl);
 	 	 	 // Update the download link
-       document.getElementById('status').textContent=""+jpgDataUrl;
-	 	 	 downloadLink.href = jpgDataUrl;
-	 	 	 downloadLink.style.display = 'inline-block';
+       //document.getElementById('status').textContent=""+jpgDataUrl;
+       //document.getElementById('myImage').src=jpgDataUrl;
+	 	 	 //downloadLink.href = jpgDataUrl;
+	 	 	 //downloadLink.style.display = 'inline-block';
 	 	 }
 
 	 	 function generateQRCode() {
@@ -105,7 +106,7 @@
 	 	 	 	 	 statusText.textContent = url;
 	 	 	 	 	 
 	 	 	 	 	 // Call the new download function after the QR code is successfully generated
-	 	 	 	 	 downloadCanvasAsJpg(qrCanvas, downloadLink);
+	 	 	 	 	 CanvasToJpg(qrCanvas, downloadLink);
 	 	 	 	 }
 	 	 	 });
 	 	 }
