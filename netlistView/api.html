@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	 <meta charset="UTF-8">
+	 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+	 <meta http-equiv="Pragma" content="no-cache">
+	 <meta http-equiv="Expires" content="0">
+	 <title>QR Code Generator</title>
+	 <script src="scripts/qrcode.min.js"></script>
+	 <style>
+	 	 body {
+	 	 	 font-family: sans-serif;
+	 	 	 text-align: center;
+	 	 	 padding-top: 50px;
+	 	 	 background-color: #f4f4f4;
+	 	 	 color: #333;
+	 	 }
+
+	 	 canvas {
+	 	 	 border: 2px solid #333;
+	 	 	 padding: 2px;
+	 	 	 background: #fff;
+	 	 	 display: block;
+	 	 	 margin: 20px auto;
+	 	 	 box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+	 	 }
+
+	 	 #status {
+	 	 	 margin: 20px auto;
+	 	 	 padding: 10px;
+	 	 	 max-width: 80%;
+	 	 	 word-wrap: break-word;
+	 	 	 border: 2px dashed #007BFF;
+	 	 	 background-color: #e6f7ff;
+	 	 	 color: #0056b3;
+	 	 	 display: inline-block;
+	 	 }
+
+	 	 #download-link {
+	 	 	 display: none; /* Initially hidden */
+	 	 	 margin-top: 20px;
+	 	 	 padding: 10px 20px;
+	 	 	 font-size: 16px;
+	 	 	 color: #fff;
+	 	 	 background-color: #28a745;
+	 	 	 border: none;
+	 	 	 border-radius: 5px;
+	 	 	 text-decoration: none;
+	 	 	 cursor: pointer;
+	 	 	 transition: background-color 0.3s ease;
+	 	 }
+
+	 	 #download-link:hover {
+	 	 	 background-color: #218838;
+	 	 }
+	 </style>
+</head>
+<body>
+	 <h1>QR Code Generator</h1>
+	 <canvas id="qrcodeCanvas" width="256" height="256"></canvas>
+	 <p id="status"></p>
+	 <a id="download-link" href="#" download="qrcode.jpg">Download QR Code as JPG</a>
+   <img id="qrcodejpg" width="256" height="256"></img>
+	 <script>
+	 	 function getQueryParam(name) {
+	 	 	 const params = new URLSearchParams(window.location.search);
+	 	 	 return params.get(name);
+	 	 }
+
+	 	 // New function to handle the download logic
+	 	 function CanvasToJpg(canvas, downloadLink) {
+	 	 	 // Convert canvas to a JPG data URL
+	 	 	 const jpgDataUrl = canvas.toDataURL('image/jpeg', 0.9); // 0.9 for quality
+	 	 	 //alert("jpgdataURL="+jpgDataUrl);
+	 	 	 // Update the download link
+       //document.getElementById('status').textContent=""+jpgDataUrl;
+       //document.getElementById('myImage').src=jpgDataUrl;
+	 	 	 //downloadLink.href = jpgDataUrl;
+	 	 	 //downloadLink.style.display = 'inline-block';
+	 	 }
+
+	 	 function generateQRCode() {
+	 	 	 const url = getQueryParam('data');
+	 	 	 const qrCanvas = document.getElementById('qrcodeCanvas');
+	 	 	 const statusText = document.getElementById('status');
+	 	 	 const downloadLink = document.getElementById('download-link');
+
+	 	 	 if (!url) {
+	 	 	 	 statusText.textContent = 'Please provide a URL in the query parameter, e.g., ?data=https://example.com';
+	 	 	 	 qrCanvas.style.display = 'none';
+	 	 	 	 return;
+	 	 	 }
+
+	 	 	 // Hide download link initially
+	 	 	 downloadLink.style.display = 'none';
+	 	 	 qrCanvas.style.display = 'block';
+	 	 	 statusText.textContent = 'Generating QR code...';
+
+	 	 	 // Generate QR code on the canvas
+	 	 	 QRCode.toCanvas(qrCanvas, url, function (error) {
+	 	 	 	 if (error) {
+	 	 	 	 	 console.error(error);
+	 	 	 	 	 statusText.textContent = "Failed to generate QR code.";
+	 	 	 	 	 downloadLink.style.display = 'none';
+	 	 	 	 } else {
+	 	 	 	 	 statusText.textContent = url;
+	 	 	 	 	 
+	 	 	 	 	 // Call the new download function after the QR code is successfully generated
+	 	 	 	 	 CanvasToJpg(qrCanvas, downloadLink);
+	 	 	 	 }
+	 	 	 });
+	 	 }
+
+	 	 window.addEventListener('DOMContentLoaded', generateQRCode);
+	 </script>
+</body>
+</html>
