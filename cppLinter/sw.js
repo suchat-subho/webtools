@@ -3,7 +3,10 @@ self.addEventListener('activate', e => e.waitUntil(clients.claim()));
 
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
-  if (url.pathname === '/api/lint' && event.request.method === 'POST') {
+
+  // Intercept POST requests to the root (index path)
+  if ((url.pathname === '/' || url.pathname.endsWith('/index.html')) &&
+      event.request.method === 'POST') {
     event.respondWith(handleLint(event.request));
   }
 });
@@ -13,6 +16,7 @@ async function handleLint(request) {
     const { code } = await request.json();
     const linted = lintCppLogic(code);
     return new Response(JSON.stringify({ linted }), {
+      status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (err) {
@@ -23,7 +27,6 @@ async function handleLint(request) {
   }
 }
 
-// same logic as page
 function lintCppLogic(src) {
   src = src.replace(/[\t ]+/g, ' ');
   src = src.replace(/;\s*/g, ';\n');
