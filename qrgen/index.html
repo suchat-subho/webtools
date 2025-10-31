@@ -6,51 +6,12 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>QR Code Generator</title>
+
+  <!-- External QR library -->
   <script src="scripts/qrcode.min.js"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding-top: 50px;
-    }
 
-    canvas {
-      border: 2px solid #333;
-      padding: 10px;
-      background: #fff;
-      display: block;
-      margin: 10px auto;
-    }
-    #canvasWrapper {
-      display: flex;
-      justify-content: center;
-      gap: 20px; /* space between the two canvases */
-      align-items: flex-start;
-      margin-top: 20px;
-    }
-
-    #status {
-      margin-top: 20px;
-      padding: 10px;
-      border: 2px dashed #007BFF;
-      display: inline-block;
-      background-color: #f0f8ff;
-      color: #333;
-    }
-
-    input[type="text"] {
-      width: 60%;
-      padding: 10px;
-      font-size: 16px;
-      margin-bottom: 20px;
-    }
-
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-  </style>
+  <!-- External CSS -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h2>QR Code Generator</h2>
@@ -58,61 +19,23 @@
   <br>
   <button onclick="generateQRCode()">Generate QR Code</button>
   <br><br>
+
   <div id="canvasWrapper">
     <canvas id="qrcodeCanvas" width="256" height="256"></canvas>
-    <canvas id="textCanvas" width="256" height="290"></canvas>
   </div>
+
   <p id="status"></p>
 
+  <!-- Modal overlay -->
+  <div id="qrModal" onclick="closeModal()">
+    <img id="zoomedQR" src="" alt="Zoomed QR Code">
+    <div id="modalUrl"></div>
+  </div>
+
   <script>
-function drawQRWithText(canvas, url) {
-  const ctx = canvas.getContext('2d');
-  const canvasWidth = canvas.width;
-  const canvasHeight = canvas.height;
-  const textY = 270;
-
-  // Clear canvas
-  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-  // Create QR code with no margin to avoid offset
-  const options = {
-    errorCorrectionLevel: 'H',
-    margin: 0,
-    width: 256 // We'll scale it ourselves if needed
-  };
-
-  // Create a temporary canvas element
-  const tempCanvas = document.createElement('canvas');
-
-  QRCode.toCanvas(tempCanvas, url, options, function (error) {
-    if (error) {
-      console.error("Error generating QR for text canvas:", error);
-      return;
-    }
-
-    const qrWidth = tempCanvas.width;
-    const qrHeight = tempCanvas.height;
-
-    // Calculate coordinates to center QR
-    const qrX = (canvasWidth - qrWidth) / 2;
-    const qrY = 0;
-
-    ctx.drawImage(tempCanvas, qrX, qrY);
-
-    // Draw text centered below QR
-    ctx.font = "14px sans-serif";
-    ctx.fillStyle = "#000";
-    ctx.textAlign = "center";
-    const displayText = url.length > 40 ? url.slice(0, 37) + "..." : url;
-    ctx.fillText(displayText, canvasWidth / 2, textY);
-  });
-}
-
-
     function generateQRCode() {
       const url = document.getElementById('urlInput').value.trim();
       const qrCanvas = document.getElementById('qrcodeCanvas');
-      const textCanvas = document.getElementById('textCanvas');
       const statusText = document.getElementById('status');
 
       if (!url) {
@@ -120,7 +43,6 @@ function drawQRWithText(canvas, url) {
         return;
       }
 
-      // QR-only canvas
       QRCode.toCanvas(qrCanvas, url, function (error) {
         if (error) {
           console.error(error);
@@ -129,9 +51,30 @@ function drawQRWithText(canvas, url) {
           statusText.textContent = url;
         }
       });
+    }
 
-      // QR + text canvas
-      drawQRWithText(textCanvas, url);
+    // Add zoom click handler
+    const qrCanvas = document.getElementById('qrcodeCanvas');
+    qrCanvas.addEventListener('click', function () {
+      const modal = document.getElementById('qrModal');
+      const zoomedQR = document.getElementById('zoomedQR');
+      const modalUrl = document.getElementById('modalUrl');
+      const url = document.getElementById('status').textContent.trim();
+
+      if (!url) return;
+
+      zoomedQR.src = qrCanvas.toDataURL('image/png');
+      modalUrl.textContent = url;
+      modal.style.display = 'flex';
+    });
+
+    function closeModal() {
+      const modal = document.getElementById('qrModal');
+      modal.style.animation = 'fadeOut 0.3s ease';
+      setTimeout(() => {
+        modal.style.display = 'none';
+        modal.style.animation = 'fadeIn 0.3s ease';
+      }, 300);
     }
   </script>
 </body>

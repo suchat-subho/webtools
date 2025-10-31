@@ -1,0 +1,124 @@
+body {
+  font-family: "Segoe UI", sans-serif;
+  text-align: center;
+  padding-top: 50px;
+  background: #f5f7fa;
+}
+
+h2 {
+  color: #333;
+  letter-spacing: 0.5px;
+}
+
+input[type="text"] {
+  width: 60%;
+  padding: 10px;
+  font-size: 16px;
+  margin-bottom: 20px;
+  border: 2px solid #007BFF;
+  border-radius: 6px;
+  outline: none;
+  transition: box-shadow 0.2s;
+}
+
+input[type="text"]:focus {
+  box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  background-color: #007BFF;
+  color: #fff;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+canvas {
+  border: 2px solid #333;
+  padding: 10px;
+  background: #fff;
+  display: block;
+  margin: 10px auto;
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+  cursor: zoom-in;
+}
+
+canvas:hover {
+  transform: scale(1.05);
+}
+
+#canvasWrapper {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+#status {
+  margin-top: 20px;
+  padding: 10px;
+  border: 2px dashed #007BFF;
+  display: inline-block;
+  background-color: #f0f8ff;
+  color: #333;
+  border-radius: 6px;
+  max-width: 80%;
+  word-break: break-all;
+}
+
+/* Modal styles */
+#qrModal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  animation: fadeIn 0.3s ease;
+}
+
+#qrModal img {
+  width: 300px;
+  height: 300px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+#modalUrl {
+  color: #fff;
+  margin-top: 15px;
+  max-width: 90%;
+  text-align: center;
+  word-break: break-all;
+  font-size: 16px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px 15px;
+  border-radius: 6px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
