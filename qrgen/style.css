@@ -49,7 +49,7 @@ canvas {
   word-break: break-all;
 }
 
-/* Modal overlay for zoomed QR */
+/* Modal overlay */
 #qrModal {
   display: none;
   position: fixed;
@@ -75,10 +75,10 @@ canvas {
   padding: 20px;
 }
 
-/* Terminal-style URL box */
+/* Terminal-style URL */
 #modalUrl {
-  color: #00FF66;                    /* bright green text */
-  background-color: #000;            /* black background */
+  color: #00FF66;
+  background-color: #000;
   margin-top: 25px;
   text-align: center;
   word-break: break-all;
@@ -91,30 +91,7 @@ canvas {
   max-width: 85%;
 }
 
-/* Only modal fade-in/out animation remains */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-/* Responsive scaling for modal */
-@media (max-width: 768px) {
-  #qrModal img {
-    width: 260px;
-    height: 260px;
-  }
-  #modalUrl {
-    font-size: 16px;
-    padding: 10px 20px;
-  }
-}
-
-/* Full-width layout for QR generator */
+/* Fullwidth container */
 .keep-container.fullwidth {
   max-width: 100%;
   width: 100%;
@@ -134,4 +111,26 @@ canvas {
   margin-left: auto;
   margin-right: auto;
   display: block;
+}
+
+/* Modal fade animation only */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@media (max-width: 768px) {
+  #qrModal img {
+    width: 260px;
+    height: 260px;
+  }
+  #modalUrl {
+    font-size: 16px;
+    padding: 10px 20px;
+  }
 }

@@ -9,19 +9,20 @@
 
   <!-- Main site theme -->
   <link rel="stylesheet" href="../style.css">
-  <!-- QR-specific enhancements -->
+  <!-- QR-specific styling -->
   <link rel="stylesheet" href="style.css">
 
+  <!-- QR generation library -->
   <script src="scripts/qrcode.min.js"></script>
 </head>
 <body>
   <h1>QR Code Generator</h1>
 
-  <!-- Full-width QR generator section -->
+  <!-- Full-width QR generator -->
   <div class="keep-container fullwidth">
     <div class="course-note">
       <input type="text" id="urlInput" placeholder="Enter URL here">
-      <button onclick="generateQRCode()">Generate QR Code</button>
+      <button id="generateBtn">Generate QR Code</button>
 
       <div id="canvasWrapper">
         <canvas id="qrcodeCanvas" width="256" height="256"></canvas>
@@ -30,55 +31,13 @@
     </div>
   </div>
 
-  <!-- Modal overlay for zoom -->
+  <!-- Zoom modal -->
   <div id="qrModal" onclick="closeModal()">
     <img id="zoomedQR" src="" alt="Zoomed QR Code">
     <div id="modalUrl"></div>
   </div>
 
-  <script>
-    function generateQRCode() {
-      const url = document.getElementById('urlInput').value.trim();
-      const qrCanvas = document.getElementById('qrcodeCanvas');
-      const statusText = document.getElementById('status');
-
-      if (!url) {
-        statusText.textContent = 'Please enter a valid URL.';
-        return;
-      }
-
-      QRCode.toCanvas(qrCanvas, url, function (error) {
-        if (error) {
-          console.error(error);
-          statusText.textContent = "Failed to generate QR code.";
-        } else {
-          statusText.textContent = url;
-        }
-      });
-    }
-
-    const qrCanvas = document.getElementById('qrcodeCanvas');
-    qrCanvas.addEventListener('click', function () {
-      const modal = document.getElementById('qrModal');
-      const zoomedQR = document.getElementById('zoomedQR');
-      const modalUrl = document.getElementById('modalUrl');
-      const url = document.getElementById('status').textContent.trim();
-
-      if (!url) return;
-
-      zoomedQR.src = qrCanvas.toDataURL('image/png');
-      modalUrl.textContent = url;
-      modal.style.display = 'flex';
-    });
-
-    function closeModal() {
-      const modal = document.getElementById('qrModal');
-      modal.style.animation = 'fadeOut 0.3s ease';
-      setTimeout(() => {
-        modal.style.display = 'none';
-        modal.style.animation = 'fadeIn 0.3s ease';
-      }, 300);
-    }
-  </script>
+  <!-- External JS logic -->
+  <script src="scripts/qr-script.js"></script>
 </body>
 </html>
