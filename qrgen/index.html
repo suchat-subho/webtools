@@ -7,26 +7,30 @@
   <meta http-equiv="Expires" content="0">
   <title>QR Code Generator</title>
 
-  <!-- External QR library -->
   <script src="scripts/qrcode.min.js"></script>
-
-  <!-- External CSS -->
+  <link rel="stylesheet" href="../style.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>QR Code Generator</h2>
-  <input type="text" id="urlInput" placeholder="Enter URL here">
-  <br>
-  <button onclick="generateQRCode()">Generate QR Code</button>
-  <br><br>
+  <h1>QR Code Generator</h1>
 
-  <div id="canvasWrapper">
-    <canvas id="qrcodeCanvas" width="256" height="256"></canvas>
+  <div class="course-grid-wrapper">
+    <div class="keep-container" style="max-width:480px;">
+      <div class="course-note">
+        <h2>Generate Your QR</h2>
+        <p>Enter any URL below to create a scannable QR code instantly.</p>
+        <input type="text" id="urlInput" placeholder="Enter URL here">
+        <button onclick="generateQRCode()">Generate QR Code</button>
+
+        <div id="canvasWrapper">
+          <canvas id="qrcodeCanvas" width="256" height="256"></canvas>
+        </div>
+        <p id="status"></p>
+      </div>
+    </div>
   </div>
 
-  <p id="status"></p>
-
-  <!-- Modal overlay -->
+  <!-- Zoom Modal -->
   <div id="qrModal" onclick="closeModal()">
     <img id="zoomedQR" src="" alt="Zoomed QR Code">
     <div id="modalUrl"></div>
@@ -53,7 +57,6 @@
       });
     }
 
-    // Add zoom click handler
     const qrCanvas = document.getElementById('qrcodeCanvas');
     qrCanvas.addEventListener('click', function () {
       const modal = document.getElementById('qrModal');
@@ -62,7 +65,6 @@
       const url = document.getElementById('status').textContent.trim();
 
       if (!url) return;
-
       zoomedQR.src = qrCanvas.toDataURL('image/png');
       modalUrl.textContent = url;
       modal.style.display = 'flex';

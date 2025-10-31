@@ -1,39 +1,31 @@
-body {
-  font-family: "Segoe UI", sans-serif;
-  text-align: center;
-  padding-top: 50px;
-  background: #f5f7fa;
-}
+/* QR Generator Styling Additions */
 
-h2 {
-  color: #333;
-  letter-spacing: 0.5px;
-}
-
-input[type="text"] {
-  width: 60%;
+#urlInput {
+  width: 90%;
   padding: 10px;
   font-size: 16px;
-  margin-bottom: 20px;
-  border: 2px solid #007BFF;
+  border: 2px solid #FCBA03;
   border-radius: 6px;
-  outline: none;
-  transition: box-shadow 0.2s;
+  margin-top: 10px;
+  background-color: #222;
+  color: #fff;
 }
 
-input[type="text"]:focus {
-  box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
+#urlInput:focus {
+  outline: none;
+  box-shadow: 0 0 8px rgba(252, 186, 3, 0.6);
 }
 
 button {
   padding: 10px 20px;
   font-size: 16px;
-  cursor: pointer;
   border: none;
   border-radius: 6px;
-  background-color: #007BFF;
+  background-color: #007bff;
   color: #fff;
-  transition: background-color 0.2s;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.2s ease-in-out;
 }
 
 button:hover {
@@ -41,41 +33,31 @@ button:hover {
 }
 
 canvas {
-  border: 2px solid #333;
-  padding: 10px;
+  border: 2px solid #FCBA03;
   background: #fff;
-  display: block;
-  margin: 10px auto;
   border-radius: 8px;
-  transition: transform 0.3s ease;
+  padding: 10px;
+  margin: 20px auto;
   cursor: zoom-in;
+  transition: transform 0.3s ease;
 }
 
 canvas:hover {
   transform: scale(1.05);
 }
 
-#canvasWrapper {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  align-items: flex-start;
-  margin-top: 20px;
-}
-
 #status {
-  margin-top: 20px;
-  padding: 10px;
-  border: 2px dashed #007BFF;
-  display: inline-block;
-  background-color: #f0f8ff;
-  color: #333;
+  background: rgba(252, 186, 3, 0.2);
+  border: 1px dashed #FCBA03;
+  color: #fff;
+  padding: 8px;
   border-radius: 6px;
-  max-width: 80%;
+  display: inline-block;
+  margin-top: 10px;
   word-break: break-all;
 }
 
-/* Modal styles */
+/* Modal overlay for zoomed QR */
 #qrModal {
   display: none;
   position: fixed;
@@ -84,7 +66,7 @@ canvas:hover {
   top: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(4px);
   justify-content: center;
   align-items: center;
@@ -93,24 +75,30 @@ canvas:hover {
 }
 
 #qrModal img {
-  width: 300px;
-  height: 300px;
+  width: 340px;
+  height: 340px;
   background: #fff;
-  padding: 20px;
+  border: 3px solid #FCBA03;
   border-radius: 12px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  box-shadow: 0 0 20px rgba(252, 186, 3, 0.4);
 }
 
+/* Terminal-style URL box */
 #modalUrl {
-  color: #fff;
-  margin-top: 15px;
-  max-width: 90%;
+  color: #00FF66;                    /* bright green text */
+  background-color: #000;            /* black background like a terminal */
+  margin-top: 25px;
   text-align: center;
   word-break: break-all;
-  font-size: 16px;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 10px 15px;
-  border-radius: 6px;
+  font-family: "Courier New", monospace;  /* terminal-like font */
+  font-size: 20px;                   /* larger text */
+  font-weight: bold;
+  padding: 15px 25px;
+  border-radius: 8px;
+  border: 2px solid #00FF66;         /* green outline */
+  box-shadow: 0 0 15px rgba(0, 255, 102, 0.6); /* glowing effect */
+  max-width: 85%;
 }
 
 @keyframes fadeIn {
@@ -121,4 +109,16 @@ canvas:hover {
 @keyframes fadeOut {
   from { opacity: 1; }
   to { opacity: 0; }
+}
+
+/* Responsive scaling for modal */
+@media (max-width: 768px) {
+  #qrModal img {
+    width: 260px;
+    height: 260px;
+  }
+  #modalUrl {
+    font-size: 16px;
+    padding: 10px 20px;
+  }
 }
