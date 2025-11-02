@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Tabbed Drawable Canvas</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Add jsPDF from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <div class="tools">
@@ -13,6 +15,10 @@
     <button id="eraserBtn">Eraser</button>
     <button id="undoBtn">Undo</button>
     <button id="clearBtn">Clear</button>
+    <button id="exportBtn">Export JSON</button>
+      <input id="importFile" type="file" accept=".json" style="display:none" />
+    <button id="importBtn">Import JSON</button>
+
     <button id="pdfBtn">Download PDF</button>
 
     <h4>Pen Colors</h4>
