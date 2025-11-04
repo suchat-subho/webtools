@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Tabbed Drawable Canvas</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Add jsPDF from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <div class="tools">
+    <h3>Tools</h3>
+    <button id="penBtn">Pen</button>
+    <button id="eraserBtn">Eraser</button>
+    <button id="undoBtn">Undo</button>
+    <button id="clearBtn">Clear</button>
+    <button id="exportBtn">Export JSON</button>
+      <input id="importFile" type="file" accept=".json" style="display:none" />
+    <button id="importBtn">Import JSON</button>
+
+    <button id="pdfBtn">Download PDF</button>
+
+    <h4>Pen Colors</h4>
+    <div class="colors">
+      <div class="color" style="background:#000000"></div>
+      <div class="color" style="background:#ff0000"></div>
+      <div class="color" style="background:#00ff00"></div>
+      <div class="color" style="background:#0000ff"></div>
+      <div class="color" style="background:#ff00ff"></div>
+      <div class="color" style="background:#00ffff"></div>
+      <div class="color" style="background:#ffa500"></div>
+      <div class="color" style="background:#808080"></div>
+    </div>
+
+    <h4>Board Color</h4>
+    <div class="bgcolors">
+      <div class="bgcolor" style="background:#ffffff"></div>
+      <div class="bgcolor" style="background:#ffffe0"></div>
+      <div class="bgcolor" style="background:#e0ffff"></div>
+      <div class="bgcolor" style="background:#f0f0f0"></div>
+    </div>
+  </div>
+
+  <div class="workspace">
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-id="1">Page 1<span class="close">×</span></div>
+      <div id="addPage">➕ Add Page</div>
+    </div>
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
