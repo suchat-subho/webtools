@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>WebRTC Receiver (Page 2)</title>
+</head>
+<body>
+  <h2>Page 2 - Receiver</h2>
+  <textarea id="offer" rows="6" cols="60" placeholder="Paste Offer here"></textarea><br>
+  <button id="createAnswer">Create Answer</button>
+  <br><br>
+  <textarea id="answer" rows="6" cols="60" placeholder="Answer (auto generated)"></textarea><br>
+  <input id="message" placeholder="Message to send" />
+  <button id="send">Send</button>
+  <pre id="log"></pre>
+
+  <script>
+    let pc = new RTCPeerConnection();
+    let channel;
+
+    pc.ondatachannel = (event) => {
+      channel = event.channel;
+      channel.onmessage = e => log("Received: " + e.data);
+      channel.onopen = () => log("Channel open!");
+    };
+
+    function log(msg) {
+      document.getElementById("log").textContent += msg + "\n";
+    }
+
+    document.getElementById("createAnswer").onclick = async () => {
+      let offer = JSON.parse(document.getElementById("offer").value);
+      await pc.setRemoteDescription(offer);
+      let answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      document.getElementById("answer").value = JSON.stringify(answer);
+    };
+
+    document.getElementById("send").onclick = () => {
+      let msg = document.getElementById("message").value;
+      channel.send(msg);
+      log("Sent: " + msg);
+    };
+  </script>
+</body>
+</html>
