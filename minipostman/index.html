@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mini-Postman — Send HTTP requests from your browser</title>
+  <style>
+    :root{--accent:#0b5cff;--muted:#666;--bg:#f6f8fb}
+    body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin:0; padding:18px; background:var(--bg); color:#111}
+    h1{font-size:20px;margin:0 0 12px}
+    .app{max-width:1100px;margin:0 auto}
+    .row{display:flex;gap:12px}
+    .controls{background:#fff;border-radius:10px;padding:14px;box-shadow:0 6px 20px rgba(20,30,50,0.06);flex:1}
+    input[type=text], select, textarea{width:100%;padding:8px;border:1px solid #e3e7ee;border-radius:6px;font-size:13px}
+    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+    .inline{display:flex;gap:8px;align-items:center}
+    .small{font-size:13px}
+    button{background:var(--accent);color:#fff;border:0;padding:9px 12px;border-radius:8px;cursor:pointer}
+    button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(11,92,255,0.14)}
+    .kv-list{margin:8px 0}
+    .kv-row{display:flex;gap:6px;margin-bottom:6px}
+    .kv-row input{flex:1}
+    .kv-row button{padding:6px}
+    .left{flex:1}
+    .right{width:420px}
+    pre{white-space:pre-wrap;background:#0f1724;color:#e6eef8;padding:10px;border-radius:8px;overflow:auto;font-family:Menlo,Monaco,monospace;font-size:13px}
+    .muted{color:var(--muted)}
+    .status{font-weight:600}
+    .flex-col{display:flex;flex-direction:column}
+    .controls-row{display:flex;gap:8px}
+    .row-gap{margin-top:12px}
+    .copy-btn{background:#eee;border-radius:6px;padding:6px 8px;border:0;cursor:pointer}
+    .note{font-size:12px;color:var(--muted);margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Mini-Postman — Send HTTP requests from your browser</h1>
+    <div class="row">
+      <div class="controls left">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+          <select id="method">
+            <option>GET</option>
+            <option>POST</option>
+            <option>PUT</option>
+            <option>PATCH</option>
+            <option>DELETE</option>
+            <option>HEAD</option>
+            <option>OPTIONS</option>
+          </select>
+          <input id="url" type="text" placeholder="https://example.com/api" />
+          <button id="send">Send</button>
+          <button id="copyCurl" class="copy-btn">Copy cURL</button>
+        </div>
+
+        <div class="controls-row">
+          <div style="flex:1">
+            <label class="small">Headers</label>
+            <div id="headers" class="kv-list"></div>
+            <button id="addHeader" class="ghost">+ Add header</button>
+
+            <div class="row-gap">
+              <label class="small">Body type</label>
+              <select id="bodyType">
+                <option value="none">None</option>
+                <option value="raw">Raw (text / JSON)</option>
+                <option value="formdata">Form Data (multipart)</option>
+                <option value="urlencoded">x-www-form-urlencoded</option>
+              </select>
+            </div>
+
+            <div id="bodyArea" class="row-gap"></div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="controls right">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><label class="small">Response</label></div>
+          <div class="muted small">Status: <span id="statusText" class="status muted">—</span></div>
+        </div>
+        <div style="margin-top:10px">
+          <label class="small">Response Headers</label>
+          <pre id="respHeaders">-</pre>
+        </div>
+        <div style="margin-top:8px">
+          <label class="small">Response Body</label>
+          <pre id="respBody">-</pre>
+        </div>
+      </div>
+    </div>
+
+    <p class="note">Note: Requests are subject to browser CORS rules. If the target server doesn't allow cross-origin requests, you'll get a CORS error. Use a server-side proxy or enable CORS on the server to avoid that.</p>
+  </div>
+
+  <template id="kvTemplate">
+    <div class="kv-row">
+      <input class="k" placeholder="Key (e.g. Authorization)"/>
+      <input class="v" placeholder="Value"/>
+      <button class="del">✕</button>
+    </div>
+  </template>
+
+  <script>
+    // Simple dynamic Postman-like single-file UI
+    const headersEl = document.getElementById('headers');
+    const addHeaderBtn = document.getElementById('addHeader');
+    const bodyType = document.getElementById('bodyType');
+    const bodyArea = document.getElementById('bodyArea');
+    const sendBtn = document.getElementById('send');
+    const methodEl = document.getElementById('method');
+    const urlEl = document.getElementById('url');
+    const respBody = document.getElementById('respBody');
+    const respHeaders = document.getElementById('respHeaders');
+    const statusText = document.getElementById('statusText');
+    const copyCurl = document.getElementById('copyCurl');
+
+    function newKV(key='', val=''){
+      const t = document.getElementById('kvTemplate');
+      const node = t.content.firstElementChild.cloneNode(true);
+      node.querySelector('.k').value = key;
+      node.querySelector('.v').value = val;
+      node.querySelector('.del').addEventListener('click', ()=>node.remove());
+      return node;
+    }
+
+    addHeaderBtn.addEventListener('click', ()=>{
+      headersEl.appendChild(newKV());
+    });
+
+    // default header rows
+    headersEl.appendChild(newKV('Content-Type','application/json'));
+
+    function buildHeaders(){
+      const rows = Array.from(headersEl.querySelectorAll('.kv-row'));
+      const h = {};
+      rows.forEach(r=>{
+        const k = r.querySelector('.k').value.trim();
+        const v = r.querySelector('.v').value;
+        if(k) h[k] = v;
+      });
+      return h;
+    }
+
+    function buildBody(type){
+      if(type === 'none') return { body:null, sendAs:null };
+      if(type === 'raw'){
+        const txt = document.getElementById('rawBody').value;
+        return { body: txt, sendAs: 'raw' };
+      }
+      if(type === 'formdata'){
+        const form = new FormData();
+        Array.from(document.querySelectorAll('.body-kv')).forEach(row=>{
+          const k = row.querySelector('.k').value;
+          const v = row.querySelector('.v').value;
+          if(k) form.append(k, v);
+        });
+        return { body: form, sendAs: 'formdata' };
+      }
+      if(type === 'urlencoded'){
+        const params = new URLSearchParams();
+        Array.from(document.querySelectorAll('.body-kv')).forEach(row=>{
+          const k = row.querySelector('.k').value;
+          const v = row.querySelector('.v').value;
+          if(k) params.append(k, v);
+        });
+        return { body: params.toString(), sendAs: 'urlencoded' };
+      }
+    }
+
+    function renderBodyArea(){
+      bodyArea.innerHTML = '';
+      const t = bodyType.value;
+      if(t === 'none') return;
+      if(t === 'raw'){
+        const label = document.createElement('label'); label.className='small'; label.textContent='Raw body (text / JSON)';
+        const ta = document.createElement('textarea'); ta.id='rawBody'; ta.rows=8; ta.placeholder='{"name": "value"}';
+        bodyArea.appendChild(label); bodyArea.appendChild(ta);
+        return;
+      }
+      // formdata or urlencoded: key-value rows
+      const label = document.createElement('label'); label.className='small'; label.textContent='Key-Value body';
+      const container = document.createElement('div'); container.className='kv-list';
+      container.id='bodyKV';
+      const add = document.createElement('button'); add.className='ghost'; add.textContent='+ Add field';
+      add.addEventListener('click', ()=> container.appendChild(bodyRow()));
+      bodyArea.appendChild(label); bodyArea.appendChild(container); bodyArea.appendChild(add);
+      container.appendChild(bodyRow());
+    }
+
+    function bodyRow(k='',v=''){
+      const row = document.createElement('div'); row.className='kv-row body-kv';
+      const ik = document.createElement('input'); ik.className='k'; ik.placeholder='key'; ik.value=k;
+      const iv = document.createElement('input'); iv.className='v'; iv.placeholder='value'; iv.value=v;
+      const del = document.createElement('button'); del.className='del'; del.textContent='✕'; del.addEventListener('click', ()=>row.remove());
+      row.appendChild(ik); row.appendChild(iv); row.appendChild(del);
+      return row;
+    }
+
+    bodyType.addEventListener('change', renderBodyArea);
+    renderBodyArea();
+
+    async function send(){
+      statusText.textContent = 'Sending...';
+      respBody.textContent = '-'; respHeaders.textContent='-';
+      const method = methodEl.value;
+      const url = urlEl.value.trim();
+      if(!url){ alert('Enter URL'); statusText.textContent='—'; return; }
+
+      const headers = buildHeaders();
+      const bt = bodyType.value;
+      const built = buildBody(bt);
+
+      const opts = { method, headers: {} };
+
+      // copy headers but do not set Content-Type when sending FormData (browser sets it)
+      Object.keys(headers).forEach(k=>{
+        if(built.sendAs === 'formdata' && k.toLowerCase()==='content-type') return;
+        opts.headers[k] = headers[k];
+      });
+
+      if(built.body !== null){
+        if(built.sendAs === 'raw'){
+          opts.body = built.body;
+        } else if(built.sendAs === 'formdata'){
+          opts.body = built.body; // FormData
+        } else if(built.sendAs === 'urlencoded'){
+          opts.body = built.body; // string
+          // ensure header
+          if(!opts.headers['Content-Type'] && !opts.headers['content-type']) opts.headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
+        }
+      }
+
+      try{
+        const r = await fetch(url, opts);
+        const ct = r.headers.get('content-type') || '';
+        const headersObj = {};
+        r.headers.forEach((v,k)=> headersObj[k]=v);
+        respHeaders.textContent = JSON.stringify(headersObj, null, 2);
+        statusText.textContent = r.status + ' ' + r.statusText;
+        let text = await r.text();
+        // try parse JSON
+        if(ct.includes('application/json')){
+          try{ text = JSON.stringify(JSON.parse(text), null, 2); }catch(e){}
+        }
+        respBody.textContent = text || '(empty)';
+      }catch(err){
+        statusText.textContent = 'Error';
+        respBody.textContent = String(err);
+      }
+    }
+
+    sendBtn.addEventListener('click', send);
+
+    function generateCurl(){
+      const method = methodEl.value;
+      const url = urlEl.value.trim();
+      if(!url) return '';
+      const headers = buildHeaders();
+      let parts = ['curl -i -X ' + method];
+      Object.keys(headers).forEach(k=>{
+        // escape single quotes in header values
+        const v = headers[k].replace(/'/g,"'\\''");
+        parts.push("-H '" + k + ": " + v + "'");
+      });
+      const bt = bodyType.value;
+      const built = buildBody(bt);
+      if(built.body !== null){
+        if(built.sendAs === 'raw'){
+          const b = built.body.replace(/'/g,"'\\''");
+          parts.push("--data $'" + b + "'");
+        } else if(built.sendAs === 'urlencoded'){
+          parts.push("--data '" + built.body.replace(/'/g,"'\\''") + "'");
+        } else if(built.sendAs === 'formdata'){
+          // can't represent binary well; include form fields
+          const arr = [];
+          Array.from(document.querySelectorAll('.body-kv')).forEach(row=>{
+            const k = row.querySelector('.k').value;
+            const v = row.querySelector('.v').value;
+            if(k) arr.push("-F '" + k + "=" + v.replace(/'/g,"'\\''") + "'");
+          });
+          parts = parts.concat(arr);
+        }
+      }
+      parts.push("'"+url+"'");
+      return parts.join(' ');
+    }
+
+    copyCurl.addEventListener('click', ()=>{
+      const c = generateCurl();
+      if(!c){ alert('URL missing'); return; }
+      navigator.clipboard.writeText(c).then(()=>alert('cURL copied to clipboard'))
+    });
+
+    // small helper: pre-populate URL for quick testing
+    urlEl.value = '';
+  </script>
+</body>
+</html>
