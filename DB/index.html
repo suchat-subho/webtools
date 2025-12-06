@@ -12,6 +12,8 @@ button { padding: 10px 20px; }
 </head>
 <body>
 
+<div id="app" style="display:none;">
+
 <h2>Google Apps Script URL Shortener</h2>
 
 <label>Action:</label>
@@ -29,9 +31,42 @@ button { padding: 10px 20px; }
 <h3>Backend Response</h3>
 <div id="out"></div>
 
-<script>
-const BACKEND = "https://script.google.com/macros/s/AKfycbwV7UQPANkrhRThtqhc7QS9-ev0DGJEgfbyphs42SThyPqQ5riTGtzYRO4pH6xD-OuWNQ/exec";
+</div>
 
+<script>
+const BACKEND =
+  "https://script.google.com/macros/s/AKfycbwV7UQPANkrhRThtqhc7QS9-ev0DGJEgfbyphs42SThyPqQ5riTGtzYRO4pH6xD-OuWNQ/exec";
+
+//
+// CASE 1: If URL contains ?action=... then behave like an API
+//
+(function apiMode() {
+    const params = new URLSearchParams(location.search);
+    if (params.has("action")) {
+        // Build backend URL
+        const backendURL = BACKEND + "?" + params.toString();
+
+        // Call backend, print raw JSON only
+        fetch(backendURL)
+            .then(r => r.text())
+            .then(txt => {
+                document.body.innerHTML = "";    // show nothing else
+                document.write(txt);             // raw JSON output
+            })
+            .catch(err => {
+                document.body.innerHTML = "";
+                document.write(JSON.stringify({error: err.toString()}));
+            });
+    } else {
+        // No action → show interface
+        document.getElementById("app").style.display = "block";
+    }
+})();
+
+
+//
+// CASE 2: UI Mode — Use the web interface
+//
 function makeShort() {
     let action = document.getElementById("action").value.trim();
     let json = document.getElementById("json").value.trim();
@@ -40,31 +75,18 @@ function makeShort() {
     if (action) params.append("action", action);
     if (json) params.append("json", json);
 
-    // Short version (GitHub Pages version)
+    // Generate short URL
     let short = location.origin + location.pathname + "?" + params.toString();
     document.getElementById("shortUrl").innerHTML = "Short URL:<br>" + short;
 
-    // Long version (actual Apps Script)
+    // Call backend
     let longUrl = BACKEND + "?" + params.toString();
 
-    // Call backend
     fetch(longUrl)
         .then(r => r.json())
         .then(j => document.getElementById("out").textContent = JSON.stringify(j, null, 2))
         .catch(e => document.getElementById("out").textContent = e);
 }
-
-// Auto-forward when URL has query parameters
-(function autoForward() {
-    const params = new URLSearchParams(location.search);
-    if (!params.has("action") && !params.has("json")) return;
-
-    let longUrl = BACKEND + "?" + params.toString();
-    fetch(longUrl)
-        .then(r => r.json())
-        .then(j => document.getElementById("out").textContent = JSON.stringify(j, null, 2))
-        .catch(e => document.getElementById("out").textContent = e);
-})();
 </script>
 
 </body>
