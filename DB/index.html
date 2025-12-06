@@ -34,38 +34,46 @@ button { padding: 10px 20px; }
 </div>
 
 <script>
+//
+// Your backend Apps Script endpoint
+//
 const BACKEND =
   "https://script.google.com/macros/s/AKfycbwV7UQPANkrhRThtqhc7QS9-ev0DGJEgfbyphs42SThyPqQ5riTGtzYRO4pH6xD-OuWNQ/exec";
 
+
 //
-// CASE 1: If URL contains ?action=... then behave like an API
+// API MODE — if ?action= is present, return RAW JSON ONLY
 //
 (function apiMode() {
     const params = new URLSearchParams(location.search);
-    if (params.has("action")) {
-        // Build backend URL
-        const backendURL = BACKEND + "?" + params.toString();
 
-        // Call backend, print raw JSON only
-        fetch(backendURL)
-            .then(r => r.text())
-            .then(txt => {
-                document.body.innerHTML = "";    // show nothing else
-                document.write(txt);             // raw JSON output
-            })
-            .catch(err => {
-                document.body.innerHTML = "";
-                document.write(JSON.stringify({error: err.toString()}));
-            });
-    } else {
-        // No action → show interface
+    // If no action parameter → show UI mode
+    if (!params.has("action")) {
         document.getElementById("app").style.display = "block";
+        return;
     }
+
+    // Create backend URL
+    const backendURL = BACKEND + "?" + params.toString();
+
+    // Call backend and output RAW JSON (no HTML)
+    fetch(backendURL)
+        .then(r => r.text())
+        .then(txt => {
+            document.open();   // wipe HTML
+            document.write(txt);  // raw JSON
+            document.close();
+        })
+        .catch(err => {
+            document.open();
+            document.write(JSON.stringify({ error: err.toString() }));
+            document.close();
+        });
 })();
 
 
 //
-// CASE 2: UI Mode — Use the web interface
+// UI MODE — runs only when no ?action= is present
 //
 function makeShort() {
     let action = document.getElementById("action").value.trim();
@@ -75,13 +83,14 @@ function makeShort() {
     if (action) params.append("action", action);
     if (json) params.append("json", json);
 
-    // Generate short URL
+    // Short URL on GitHub Pages
     let short = location.origin + location.pathname + "?" + params.toString();
     document.getElementById("shortUrl").innerHTML = "Short URL:<br>" + short;
 
-    // Call backend
+    // Backend URL
     let longUrl = BACKEND + "?" + params.toString();
 
+    // Fetch backend for UI preview
     fetch(longUrl)
         .then(r => r.json())
         .then(j => document.getElementById("out").textContent = JSON.stringify(j, null, 2))
