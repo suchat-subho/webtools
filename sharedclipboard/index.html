@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Shared Clipboard / Message Board — WebRTC (no server)</title>
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial; max-width:1000px; margin:16px auto; padding:8px; }
+    h1 { font-size:20px; margin-bottom:6px }
+    .grid { display:grid; gap:12px; grid-template-columns: 1fr 1fr; }
+    textarea { width:100%; height:120px; font-family:monospace; }
+    .controls { display:flex; gap:8px; flex-wrap:wrap }
+    .card{ border:1px solid #ddd; padding:12px; border-radius:8px; background:#fafafa }
+    .log { height:220px; overflow:auto; border:1px solid #eee; padding:8px; background:#fff }
+    button { padding:8px 10px; border-radius:6px; cursor:pointer }
+    input[type=text]{ width:100%; }
+    .full { grid-column: 1 / -1 }
+    label{ font-weight:600; display:block; margin-bottom:6px }
+    .small { font-size:12px; color:#666 }
+  </style>
+</head>
+<body>
+  <h1>Shared Clipboard / Message Board — WebRTC (peer-to-peer, manual signaling)</h1>
+  <p class="small">No server required. Use the "Create Offer" / "Accept Offer" copy-paste signaling workflow below. Works in modern browsers (HTTPS or localhost).</p>
+
+  <div class="grid">
+    <div class="card">
+      <label>Local clipboard / message (type or paste)</label>
+      <textarea id="localMsg" placeholder="Type a message or paste clipboard contents..."></textarea>
+      <div class="controls" style="margin-top:8px">
+        <button id="btnReadClipboard">Read from system clipboard</button>
+        <button id="btnWriteClipboard">Write selected message to system clipboard</button>
+        <button id="btnSend">Send to peer</button>
+        <button id="btnClearLocal">Clear</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <label>Remote message board / log</label>
+      <div id="log" class="log"></div>
+      <div style="margin-top:8px" class="controls">
+        <button id="btnCopyAll">Copy all remote messages</button>
+        <button id="btnClearLog">Clear log</button>
+      </div>
+    </div>
+
+    <div class="card full">
+      <label>Signaling (manual - copy/paste)</label>
+      <div style="display:flex; gap:8px; align-items:flex-start">
+        <div style="flex:1">
+          <div style="display:flex; gap:8px; margin-bottom:8px">
+            <button id="btnCreateOffer">Create Offer</button>
+            <button id="btnCreateAnswer">Create Answer (after pasting remote offer)</button>
+            <button id="btnSetRemote">Set Remote Description (paste remote answer here)</button>
+          </div>
+          <textarea id="localSDP" placeholder="Local SDP / offer or answer will appear here (after generation). Use this to copy -> send to other peer."></textarea>
+        </div>
+        <div style="width:12px"></div>
+        <div style="flex:1">
+          <label class="small">Paste remote SDP here (offer or answer)</label>
+          <textarea id="remoteSDP" placeholder="Paste remote SDP (from other peer) here"></textarea>
+        </div>
+      </div>
+      <p class="small">Tip: wait until the Local SDP textarea finishes populating (it will include ICE candidates). If your browser supports trickle ICE, we wait for ICE gathering to finish before showing the SDP.</p>
+    </div>
+
+    <div class="card full">
+      <label>Status</label>
+      <div id="status">Idle</div>
+    </div>
+  </div>
+
+<script>
+(async function(){
+  const btnCreateOffer = document.getElementById('btnCreateOffer');
+  const btnCreateAnswer = document.getElementById('btnCreateAnswer');
+  const btnSetRemote = document.getElementById('btnSetRemote');
+  const localSDP = document.getElementById('localSDP');
+  const remoteSDP = document.getElementById('remoteSDP');
+  const localMsg = document.getElementById('localMsg');
+  const logEl = document.getElementById('log');
+  const btnSend = document.getElementById('btnSend');
+  const btnReadClipboard = document.getElementById('btnReadClipboard');
+  const btnWriteClipboard = document.getElementById('btnWriteClipboard');
+  const btnCopyAll = document.getElementById('btnCopyAll');
+  const btnClearLog = document.getElementById('btnClearLog');
+  const btnClearLocal = document.getElementById('btnClearLocal');
+  const statusEl = document.getElementById('status');
+
+  let pc = null;
+  let dc = null;
+
+  function log(msg, incoming=false){
+    const time = new Date().toLocaleTimeString();
+    const el = document.createElement('div');
+    el.innerHTML = `<strong>${incoming? 'Remote':'You'}</strong> <span class="small">[${time}]</span>: ${escapeHtml(msg)}`;
+    logEl.appendChild(el);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>'); }
+
+  function setStatus(s){ statusEl.textContent = s }
+
+  function createPeer(initiator){
+    pc = new RTCPeerConnection({iceServers:[{urls:['stun:stun.l.google.com:19302']} ]});
+    setStatus('PeerConnection created (' + (initiator? 'initiator':'receiver') + ')');
+
+    pc.onconnectionstatechange = () => setStatus('Connection state: ' + pc.connectionState);
+
+    pc.oniceconnectionstatechange = () => setStatus('ICE connection state: ' + pc.iceConnectionState);
+
+    pc.ondatachannel = (ev) => {
+      dc = ev.channel;
+      attachDataChannel();
+    };
+
+    // log local ICE candidate generation to console (not required for manual SDP workflow since we wait for gather complete)
+    pc.onicecandidate = (ev)=>{
+      // we ignore here; final SDP will include candidates once gatheringComplete
+    };
+    return pc;
+  }
+
+  function attachDataChannel(){
+    dc.onopen = ()=> setStatus('DataChannel open');
+    dc.onclose = ()=> setStatus('DataChannel closed');
+    dc.onmessage = (ev)=>{
+      // received a message — append to log and also update clipboard suggestion
+      log(ev.data, true);
+    };
+  }
+
+  async function waitForIceGatheringComplete(pc){
+    if (pc.iceGatheringState === 'complete') return;
+    await new Promise(resolve => {
+      function check(){ if (pc.iceGatheringState === 'complete') { pc.removeEventListener('icegatheringstatechange', check); resolve(); } }
+      pc.addEventListener('icegatheringstatechange', check);
+    });
+  }
+
+  btnCreateOffer.addEventListener('click', async ()=>{
+    createPeer(true);
+    dc = pc.createDataChannel('clipboard');
+    attachDataChannel();
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    setStatus('Waiting for ICE candidates...');
+    await waitForIceGatheringComplete(pc);
+    localSDP.value = pc.localDescription ? pc.localDescription.sdp : '';
+    setStatus('Offer ready. Copy and send it to the remote peer.');
+  });
+
+  btnCreateAnswer.addEventListener('click', async ()=>{
+    // expects remote offer in remoteSDP
+    const sdp = remoteSDP.value.trim();
+    if (!sdp) return alert('Paste remote OFFER SDP into the right-hand box first.');
+    createPeer(false);
+    const desc = { type: 'offer', sdp };
+    await pc.setRemoteDescription(desc);
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    setStatus('Waiting for ICE candidates...');
+    await waitForIceGatheringComplete(pc);
+    localSDP.value = pc.localDescription ? pc.localDescription.sdp : '';
+    setStatus('Answer ready. Copy and send it back to the offering peer.');
+  });
+
+  btnSetRemote.addEventListener('click', async ()=>{
+    // expects remote answer in remoteSDP
+    const sdp = remoteSDP.value.trim();
+    if (!sdp) return alert('Paste remote ANSWER SDP into the right-hand box first.');
+    if (!pc) return alert('You need to create an Offer first (on this side) before setting a remote Answer.');
+    const desc = { type: 'answer', sdp };
+    await pc.setRemoteDescription(desc);
+    setStatus('Remote description set. Waiting for connection...');
+  });
+
+  btnSend.addEventListener('click', ()=>{
+    const text = localMsg.value;
+    if (!text) return;
+    if (!dc || dc.readyState !== 'open') { alert('DataChannel is not open. Make sure both peers have exchanged SDPs and are connected.'); return; }
+    dc.send(text);
+    log(text, false);
+  });
+
+  btnReadClipboard.addEventListener('click', async ()=>{
+    try{
+      const text = await navigator.clipboard.readText();
+      localMsg.value = text;
+    }catch(e){ alert('Failed to read clipboard. Your browser may require a user gesture or page served over HTTPS.'); }
+  });
+
+  btnWriteClipboard.addEventListener('click', async ()=>{
+    try{
+      await navigator.clipboard.writeText(localMsg.value);
+      alert('Copied to system clipboard');
+    }catch(e){ alert('Failed to write clipboard. Browser restriction or insecure context.'); }
+  });
+
+  btnCopyAll.addEventListener('click', async ()=>{
+    try{
+      const text = Array.from(logEl.children).map(row => row.textContent).join('\n\n');
+      await navigator.clipboard.writeText(text);
+      alert('All remote messages copied to clipboard');
+    }catch(e){ alert('Failed to copy.'); }
+  });
+
+  btnClearLog.addEventListener('click', ()=>{ logEl.innerHTML=''; });
+  btnClearLocal.addEventListener('click', ()=>{ localMsg.value=''; });
+
+  // simple helper to import remote SDP when the user pastes into remoteSDP and presses Ctrl+Enter
+  remoteSDP.addEventListener('keydown', (e)=>{ if (e.key === 'Enter' && (e.ctrlKey||e.metaKey)) { // play nice
+    // attempt to auto-detect whether it's offer or answer
+    const sdp = remoteSDP.value;
+    if (!sdp) return;
+    if (sdp.includes('a=ice-options')){ /* noop */ }
+  }});
+
+  // show small usage hint on load
+  setStatus('Ready — create an Offer on one peer and generate an Answer on the other. Copy/paste SDPs between peers.');
+})();
+</script>
+  <!-- QRCode library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  
+  <div id="qrModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center;">
+    <div style="background:white; padding:20px; border-radius:12px; text-align:center; max-width:90%;">
+      <h3>Scan this QR Code</h3>
+      <div id="qrContainer"></div>
+      <button onclick="document.getElementById('qrModal').style.display='none'" style="margin-top:12px; padding:8px 14px">Close</button>
+    </div>
+  </div>
+
+<script>
+// Add QR generation helpers
+function showQR(text) {
+  const modal = document.getElementById('qrModal');
+  const qrC = document.getElementById('qrContainer');
+  qrC.innerHTML = '';
+  new QRCode(qrC, { text, width:256, height:256 });
+  modal.style.display = 'flex';
+}
+
+// Hook into existing offer/answer generation
+const oldCreateOffer = btnCreateOffer.onclick;
+btnCreateOffer.onclick = async () => {
+  await oldCreateOffer();
+  showQR(localSDP.value);
+};
+
+const oldCreateAnswer = btnCreateAnswer.onclick;
+btnCreateAnswer.onclick = async () => {
+  await oldCreateAnswer();
+  showQR(localSDP.value);
+};
+</script>
+
+  <!-- QRCode + jsQR libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
+
+  <!-- QR Modal -->
+  <div id="qrModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center;">
+    <div style="background:white; padding:20px; border-radius:12px; text-align:center; max-width:90%;">
+      <h3>Scan this QR Code</h3>
+      <div id="qrContainer"></div>
+      <button onclick="document.getElementById('qrModal').style.display='none'" style="margin-top:12px; padding:8px 14px">Close</button>
+    </div>
+  </div>
+
+  <!-- Camera Scanner Modal -->
+  <div id="scanModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center;">
+    <div style="background:white; padding:20px; border-radius:12px; text-align:center; max-width:95%;">
+      <h3>Scan remote SDP QR</h3>
+      <video id="scanVideo" autoplay playsinline style="width:80%; border-radius:8px;"></video>
+      <canvas id="scanCanvas" style="display:none;"></canvas>
+      <button onclick="stopScan()" style="margin-top:10px; padding:8px 14px">Stop</button>
+    </div>
+  </div>
+
+<script>
+function showQR(text) {
+  const modal = document.getElementById('qrModal');
+  const qrC = document.getElementById('qrContainer');
+  qrC.innerHTML = '';
+  new QRCode(qrC, { text, width:256, height:256 });
+  modal.style.display = 'flex';
+}
+
+// --- Camera QR Scanner ---
+let scanStream = null;
+let scanActive = false;
+
+async function startScan() {
+  const modal = document.getElementById('scanModal');
+  const video = document.getElementById('scanVideo');
+  scanActive = true;
+
+  scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+  video.srcObject = scanStream;
+
+  modal.style.display = 'flex';
+  requestAnimationFrame(scanLoop);
+}
+
+function stopScan() {
+  scanActive = false;
+  const modal = document.getElementById('scanModal');
+  modal.style.display = 'none';
+  if (scanStream) scanStream.getTracks().forEach(t => t.stop());
+}
+
+function scanLoop() {
+  if (!scanActive) return;
+
+  const video = document.getElementById('scanVideo');
+  const canvas = document.getElementById('scanCanvas');
+  const ctx = canvas.getContext('2d');
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = jsQR(img.data, img.width, img.height);
+
+  if (code) {
+    stopScan();
+    remoteSDP.value = code.data;
+    alert('QR decoded and SDP inserted!');
+  } else {
+    requestAnimationFrame(scanLoop);
+  }
+}
+
+// Add scan button to UI
+const signalBlock = document.querySelector('#localSDP').parentNode;
+const scanBtn = document.createElement('button');
+scanBtn.textContent = 'Scan Remote SDP QR';
+scanBtn.style.marginTop = '8px';
+scanBtn.onclick = startScan;
+signalBlock.appendChild(scanBtn);
+
+// Hook offer/answer buttons to show QR
+const oldOffer = btnCreateOffer.onclick;
+btnCreateOffer.onclick = async () => {
+  await oldOffer();
+  showQR(localSDP.value);
+};
+
+const oldAnswer = btnCreateAnswer.onclick;
+btnCreateAnswer.onclick = async () => {
+  await oldAnswer();
+  showQR(localSDP.value);
+};
+</script>
+</body>
+</html>
