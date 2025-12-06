@@ -1,264 +1,203 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8"/>
-<title>QR WebRTC – Working Version</title>
+<meta charset="UTF-8">
+<title>Shared Clipboard - WebRTC + QR + Compression</title>
+
 <style>
-  body{ font-family: sans-serif; max-width:900px; margin:18px auto; padding:12px; }
-  .card{ border:1px solid #ddd; padding:12px; border-radius:8px; margin-bottom:12px; background:#fafafa }
-  #qrBox{ text-align:center; padding:12px }
-  video{ max-width:100%; border-radius:8px; }
-  #log{ height:180px; overflow:auto; background:#fff; padding:8px; border:1px solid #eee }
-  button{ padding:8px 12px; margin:6px; }
-  .small{ font-size:13px; color:#555 }
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+#qrArea, #videoContainer {
+    margin-top: 20px;
+    text-align: center;
+}
+textarea {
+    width: 100%;
+    height: 150px;
+}
+button {
+    padding: 12px 20px;
+    margin: 5px;
+    font-size: 16px;
+}
+#video {
+    width: 300px;
+}
 </style>
+
+<!-- QR Code Generator -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<!-- jsQR Scanner -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
+
+<!-- Compression Library -->
+<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+
 </head>
 <body>
-<h2>QR WebRTC — Working Version</h2>
-<p class="small">
-Host: click <b>Start</b>. Client: open same page on another device → scan QR.  
-Flow: Offer QR → Client scans → Client displays Answer QR → Host scans → Connected.
-</p>
 
-<div class="card">
-  <strong>Role:</strong>
-  <select id="role">
-    <option value="host">Host</option>
-    <option value="client">Client</option>
-  </select>
-  <br><br>
-  <button id="startBtn">Start</button>
-  <button id="stopBtn" disabled>Stop</button>
+<h2>Shared Clipboard (WebRTC + QR)</h2>
+
+<button onclick="startHost()">Start as Host</button>
+<button onclick="startClient()">Start as Client</button>
+
+<h3>Your Clipboard</h3>
+<textarea id="localText"></textarea>
+<button onclick="sendMessage()">Send</button>
+
+<h3>Received</h3>
+<textarea id="remoteText"></textarea>
+
+<div id="qrArea"></div>
+
+<div id="videoContainer">
+    <video id="video" autoplay></video>
+    <canvas id="canvas" width="300" height="300" style="display:none;"></canvas>
 </div>
-
-<div class="card">
-  <div id="qrBox">
-    <div id="qrArea"></div>
-    <div id="qrHint" class="small"></div>
-  </div>
-  <video id="cam" autoplay playsinline style="display:none;"></video>
-</div>
-
-<div class="card">
-  <strong>Status / Log</strong>
-  <div id="log"></div>
-</div>
-
-<!-- Correct QR library -->
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
-
-<!-- jsQR scanner -->
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 
 <script>
-(function(){
-  const roleSel = document.getElementById("role");
-  const startBtn = document.getElementById("startBtn");
-  const stopBtn = document.getElementById("stopBtn");
-  const qrArea = document.getElementById("qrArea");
-  const qrHint = document.getElementById("qrHint");
-  const cam = document.getElementById("cam");
-  const logEl = document.getElementById("log");
+// ------------------------------------------------------------
+// Utility: SDP compression
+// ------------------------------------------------------------
+function encodeSDP(obj) {
+    const json = JSON.stringify(obj);
+    const bytes = new TextEncoder().encode(json);
+    const compressed = pako.deflate(bytes);
+    const b64 = btoa(String.fromCharCode(...compressed));
+    return "SC:" + b64;
+}
 
-  function log(msg){
-    logEl.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
-    logEl.scrollTop = logEl.scrollHeight;
-  }
+function decodeSDP(str) {
+    const b64 = str.replace("SC:", "");
+    const bin = atob(b64);
+    const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+    const decompressed = pako.inflate(bytes);
+    const json = new TextDecoder().decode(decompressed);
+    return JSON.parse(json);
+}
 
-  function encode(obj){
-    return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
-  }
-  function decode(b64){
-    try {
-      return JSON.parse(decodeURIComponent(escape(atob(b64))));
-    } catch(e){
-      return null;
-    }
-  }
+// ------------------------------------------------------------
+// WebRTC
+// ------------------------------------------------------------
+let pc;
+let channel;
+let isHost = false;
 
-  // ----- QR Rendering -----
-  function showQR(text, label){
-    qrArea.innerHTML = "";
-    qrHint.textContent = label;
+function createPeerConnection() {
+    pc = new RTCPeerConnection({ iceServers: [] });
 
-    QRCode.toCanvas(text, { width: 300 }, function(err, canvas){
-      if(err){
-        console.error(err);
-        qrArea.textContent = text;
-      } else {
-        qrArea.appendChild(canvas);
-      }
-    });
-  }
+    pc.ondatachannel = (ev) => {
+        channel = ev.channel;
+        channel.onmessage = (msg) => {
+            remoteText.value = msg.data;
+        };
+    };
 
-  // ----- Camera + Scanner -----
-  let scanStream = null;
-  let scanning = false;
-  const scanCanvas = document.createElement("canvas");
-  const scanCtx = scanCanvas.getContext("2d");
-
-  async function startCamera(){
-    if (!scanStream) {
-      scanStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" }
-      });
-    }
-    cam.srcObject = scanStream;
-    cam.style.display = "block";
-  }
-
-  function stopCamera(){
-    if(scanStream){
-      scanStream.getTracks().forEach(t=>t.stop());
-      scanStream = null;
-    }
-    cam.style.display = "none";
-  }
-
-  function startScan(onResult){
-    scanning = true;
-    startCamera().then(()=>requestAnimationFrame(loop));
-
-    function loop(){
-      if(!scanning) return;
-
-      if (cam.videoWidth > 0) {
-        scanCanvas.width = cam.videoWidth;
-        scanCanvas.height = cam.videoHeight;
-        scanCtx.drawImage(cam, 0, 0);
-        const img = scanCtx.getImageData(0,0,scanCanvas.width,scanCanvas.height);
-        const code = jsQR(img.data, img.width, img.height);
-        if (code) {
-          scanning = false;
-          onResult(code.data);
-          return;
+    pc.onicecandidate = () => {
+        if (pc.iceGatheringState === "complete") {
+            if (isHost) generateOfferQR();
+            else generateAnswerQR();
         }
-      }
-      requestAnimationFrame(loop);
-    }
-  }
+    };
+}
 
-  function stopScan(){
-    scanning = false;
-    stopCamera();
-  }
-
-  // ----- WebRTC -----
-  let pc = null;
-  let dc = null;
-
-  function waitIceComplete(pc){
-    return new Promise(res=>{
-      if(pc.iceGatheringState === "complete") return res();
-      const check = ()=>{
-        if(pc.iceGatheringState === "complete") {
-          pc.removeEventListener("icegatheringstatechange", check);
-          res();
-        }
-      };
-      pc.addEventListener("icegatheringstatechange", check);
-      setTimeout(res, 3000);
-    });
-  }
-
-  async function hostFlow(){
-    log("Host: Creating peer connection...");
-
-    pc = new RTCPeerConnection({ iceServers:[{ urls:"stun:stun.l.google.com:19302" }] });
-    dc = pc.createDataChannel("clipboard");
-    dc.onopen = ()=>log("DataChannel open");
-    dc.onmessage = (ev)=>log("Remote: " + ev.data);
+async function startHost() {
+    isHost = true;
+    createPeerConnection();
+    channel = pc.createDataChannel("clip");
 
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
+}
 
-    await waitIceComplete(pc);
+async function startClient() {
+    isHost = false;
+    createPeerConnection();
+    startQRScanner();
+}
 
-    const payload = { type:"offer", sdp: pc.localDescription.sdp };
-    const encoded = encode(payload);
+async function applyRemoteDescription(sdpObj) {
+    await pc.setRemoteDescription(sdpObj);
 
-    showQR(encoded, "Host: Let Client scan this QR");
-    log("Host: Offer QR displayed.");
+    if (!isHost) {
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+    }
+}
 
-    // Now wait for Client’s Answer QR
-    qrHint.textContent = "Host: Point camera at Client’s Answer QR";
-
-    await startCamera();
-    startScan(async qrText=>{
-      stopScan();
-
-      const decoded = decode(qrText);
-      if(!decoded || decoded.type !== "answer"){
-        log("Host: Invalid answer QR");
-        return;
-      }
-
-      await pc.setRemoteDescription({ type:"answer", sdp: decoded.sdp });
-      log("Host: Answer applied. Connecting...");
-      qrHint.textContent = "Connected (check log)";
-      qrArea.innerHTML = "";
-    });
-  }
-
-  async function clientFlow(){
-    log("Client: Scan Host Offer QR");
-    qrHint.textContent = "Client: Scan Host Offer QR";
-
-    await startCamera();
-    startScan(async qrText=>{
-      stopScan();
-
-      const decoded = decode(qrText);
-      if(!decoded || decoded.type !== "offer"){
-        log("Client: Invalid offer QR");
-        return;
-      }
-
-      log("Client: Offer received.");
-
-      pc = new RTCPeerConnection({ iceServers:[{ urls:"stun:stun.l.google.com:19302" }] });
-      pc.ondatachannel = ev=>{
-        dc = ev.channel;
-        dc.onopen = ()=>log("DataChannel open");
-        dc.onmessage = ev=>log("Remote: " + ev.data);
-      };
-
-      await pc.setRemoteDescription({ type:"offer", sdp: decoded.sdp });
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-
-      await waitIceComplete(pc);
-
-      const payload = { type:"answer", sdp: pc.localDescription.sdp };
-      const encoded = encode(payload);
-
-      log("Client: Showing Answer QR");
-      showQR(encoded, "Client: Show this QR to Host");
-    });
-  }
-
-  // ----- UI buttons -----
-  startBtn.onclick = ()=>{
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
-    logEl.innerHTML = "";
+// ------------------------------------------------------------
+// QR Generation
+// ------------------------------------------------------------
+function showQR(text) {
     qrArea.innerHTML = "";
-    roleSel.disabled = true;
+    new QRCode(qrArea, {
+        text: text,
+        width: 256,
+        height: 256
+    });
+}
 
-    if (roleSel.value === "host") hostFlow();
-    else clientFlow();
-  };
+function generateOfferQR() {
+    const small = encodeSDP(pc.localDescription);
+    showQR(small);
+}
 
-  stopBtn.onclick = ()=>{
-    startBtn.disabled = false;
-    stopBtn.disabled = true;
-    roleSel.disabled = false;
-    stopScan();
-    stopCamera();
-    if(pc) pc.close();
-    log("Stopped.");
-  };
-})();
+function generateAnswerQR() {
+    const small = encodeSDP(pc.localDescription);
+    showQR(small);
+}
+
+// ------------------------------------------------------------
+// Send clipboard message
+// ------------------------------------------------------------
+function sendMessage() {
+    if (channel && channel.readyState === "open") {
+        channel.send(localText.value);
+    }
+}
+
+// ------------------------------------------------------------
+// QR Scanner
+// ------------------------------------------------------------
+let scanning = false;
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+async function startQRScanner() {
+    scanning = true;
+    qrArea.innerHTML = "<p>Scan Host QR</p>";
+
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+    video.srcObject = stream;
+
+    requestAnimationFrame(scanLoop);
+}
+
+function scanLoop() {
+    if (!scanning) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imgData.data, imgData.width, imgData.height);
+
+    if (code) {
+        scanning = false;
+        video.srcObject.getTracks().forEach(t => t.stop());
+
+        const decoded = decodeSDP(code.data);
+        applyRemoteDescription(decoded);
+    } else {
+        requestAnimationFrame(scanLoop);
+    }
+}
+
 </script>
 </body>
 </html>
