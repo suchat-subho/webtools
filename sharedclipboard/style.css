@@ -1,0 +1,15 @@
+body { font-family: system-ui, -apple-system, Arial; max-width:1000px; margin:18px auto; padding:12px; }
+h1 { font-size:18px; }
+.row { display:flex; gap:16px; align-items:flex-start; }
+.block { flex:1; padding:14px; border:1px solid #ddd; border-radius:10px; transition:all .25s; }
+.block.active { border-color:#0b76ff; box-shadow:0 6px 18px rgba(11,118,255,0.12); }
+.block.inactive { filter: blur(3px); opacity:.35; pointer-events: none; }
+label{ display:block; font-weight:600; margin-bottom:6px }
+input[type=text], textarea { width:100%; padding:8px; font-size:14px; box-sizing:border-box; }
+button { padding:8px 12px; border-radius:8px; cursor:pointer; }
+#status { margin:12px 0; padding:10px; background:#f3f4f6; border-radius:8px; font-weight:600 }
+#backend { display:hidden; }
+#clipboardWrap { margin-top:16px; display:none; }
+textarea.clip{ height:140px; font-family:monospace; }
+.meta { color:#666; font-size:13px; margin-top:6px }
+.small { font-size:13px; color:#666 }
