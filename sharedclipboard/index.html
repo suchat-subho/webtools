@@ -1,198 +1,320 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
-<meta charset="UTF-8" />
-<title>Mini WebRTC (<60 chars)</title>
+<meta charset="utf-8" />
+<title>Shared Clipboard — DB-backed Signaling (Option B)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
-body { font-family: sans-serif; padding: 20px; }
-#qr { margin-top: 20px; }
-textarea { width: 100%; height: 60px; }
-#tinyStr { margin-top: 10px; font-size: 18px; font-weight: bold; }
-#charCount { font-weight: bold; }
+  body { font-family: system-ui, -apple-system, Arial; max-width:1000px; margin:18px auto; padding:12px; }
+  h1 { font-size:18px; }
+  .row { display:flex; gap:16px; align-items:flex-start; }
+  .block { flex:1; padding:14px; border:1px solid #ddd; border-radius:10px; transition:all .25s; }
+  .block.active { border-color:#0b76ff; box-shadow:0 6px 18px rgba(11,118,255,0.12); }
+  .block.inactive { filter: blur(3px); opacity:.35; pointer-events: none; }
+  label{ display:block; font-weight:600; margin-bottom:6px }
+  input[type=text], textarea { width:100%; padding:8px; font-size:14px; box-sizing:border-box; }
+  button { padding:8px 12px; border-radius:8px; cursor:pointer; }
+  #status { margin:12px 0; padding:10px; background:#f3f4f6; border-radius:8px; font-weight:600 }
+  #clipboardWrap { margin-top:16px; display:none; }
+  textarea.clip{ height:140px; font-family:monospace; }
+  .meta { color:#666; font-size:13px; margin-top:6px }
+  .small { font-size:13px; color:#666 }
 </style>
 </head>
 <body>
 
-<h2>Mini WebRTC Connect (<60 chars)</h2>
+<h1>Shared Clipboard — DB-backed Signaling (Option B)</h1>
+<p class="small">Backend must use the Option B format (stored JSON strings). The app stores Offer & Answer as JSON strings and exchanges short keys. Host polls the DB for answers (scans all entries).</p>
 
-<button id="hostBtn">Start Host</button>
-<button id="joinBtn">Start Join</button>
+<label>Backend URL</label>
+<input id="backend" type="text"
+  value="https://script.google.com/macros/s/AKfycbwV7UQPANkrhRThtqhc7QS9-ev0DGJEgfbyphs42SThyPqQ5riTGtzYRO4pH6xD-OuWNQ/exec" />
 
-<div id="qr"></div>
-<div id="tinyStr"></div>
-<div id="charCount"></div>
+<div id="status">Status: Idle</div>
 
-<h3>Paste Connection String</h3>
-<textarea id="remoteStr"></textarea><br>
-<button id="applyBtn">Apply</button>
+<div class="row" style="margin-top:12px">
+  <div id="hostBlock" class="block">
+    <h3>Host</h3>
+    <div class="small">Create offer & publish to DB. Share the Offer Key with your peer.</div>
+    <div style="margin-top:12px">
+      <button id="hostBtn">Create Offer</button>
+      <div class="meta">Offer Key: <span id="offerKey">—</span></div>
+      <div class="meta">Answer Key (found): <span id="foundAnswerKey">—</span></div>
+    </div>
+  </div>
 
-<!-- pako for DEFLATE -->
-<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
-<!-- QR -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <div id="clientBlock" class="block">
+    <h3>Client</h3>
+    <div class="small">Fetch Offer using Offer Key, create Answer and publish to DB.</div>
+    <div style="margin-top:12px">
+      <label>Offer Key from Host</label>
+      <input id="clientOfferInput" placeholder="Enter offer key (e.g. 0a6289bb)" />
+      <div style="margin-top:8px">
+        <button id="clientBtn">Fetch & Create Answer</button>
+      </div>
+      <div class="meta">Answer Key (published): <span id="answerKey">—</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="clipboardWrap">
+  <h3>Shared Clipboard</h3>
+  <div style="display:flex; gap:12px;">
+    <div style="flex:1">
+      <label>You (send)</label>
+      <textarea id="sendClip" class="clip" placeholder="Type to send..."></textarea>
+    </div>
+    <div style="flex:1">
+      <label>Remote (received)</label>
+      <textarea id="recvClip" class="clip" placeholder="Remote content..." readonly></textarea>
+    </div>
+  </div>
+  <div class="meta">Clipboard visible only when connection is established.</div>
+</div>
 
 <script>
-/* ---------- Z85 Encoding (ZeroMQ spec) ---------- */
-const Z85 = {
-    encoder: (data) => {
-        const chars =
-"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!/*?&<>()[]{}@%$#";
-        let str = "";
-        let value = 0;
-        for (let i = 0; i < data.length; i++) {
-            value = value * 256 + data[i];
-            if (i % 4 === 3) {
-                let divisor = 85 * 85 * 85 * 85;
-                for (let j = 0; j < 5; j++) {
-                    str += chars[Math.floor(value / divisor) % 85];
-                    divisor /= 85;
-                }
-                value = 0;
-            }
-        }
-        return str;
-    },
-    decoder: (str) => {
-        const chars =
-"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!/*?&<>()[]{}@%$#";
-        const data = [];
-        let value = 0;
-        for (let i = 0; i < str.length; i++) {
-            value = value * 85 + chars.indexOf(str[i]);
-            if (i % 5 === 4) {
-                let divisor = 256 * 256 * 256;
-                for (let j = 0; j < 4; j++) {
-                    data.push((value / divisor) >> 0);
-                    value %= divisor;
-                    divisor /= 256;
-                }
-                value = 0;
-            }
-        }
-        return new Uint8Array(data);
-    }
+/* -------------------------
+  Config & small helpers
+   ------------------------- */
+const getBackend = () => document.getElementById('backend').value.replace(/\s+$/,'');
+const setStatus = (s) => document.getElementById('status').textContent = 'Status: ' + s;
+const hostBlock = document.getElementById('hostBlock');
+const clientBlock = document.getElementById('clientBlock');
+const activate = (role) => {
+  if (role === 'host') { hostBlock.classList.add('active'); clientBlock.classList.add('inactive'); }
+  else if (role === 'client') { clientBlock.classList.add('active'); hostBlock.classList.add('inactive'); }
+  else { hostBlock.classList.remove('active','inactive'); clientBlock.classList.remove('active','inactive'); }
 };
 
-/* -------- Minimal SDP Templates -------- */
-function buildOfferSDP(u, p, c) {
-return `v=0
-o=- 1 2 IN IP4 0.0.0.0
-s=-
-t=0 0
-a=ice-options:trickle
-a=ice-ufrag:${u}
-a=ice-pwd:${p}
-m=application 9 DTLS/SCTP 5000
-a=candidate:${c}`;
+/* DB helpers (Option B: values are stored as JSON strings) */
+async function db_set(obj) {
+  // obj should be a plain JSON object; we send it in the ?json= param
+  const url = getBackend() + '?action=set&json=' + encodeURIComponent(JSON.stringify(obj));
+  const res = await fetch(url);
+  return await res.json(); // expected { key: "..." } or { status: "ok", key: "..." }
 }
-function buildAnswerSDP(u, p, c) {
-return buildOfferSDP(u, p, c);
+async function db_get_keys(keyList) {
+  // returns mapping: { key: "<stringified-json>" }
+  const url = getBackend() + '?action=get&keys=' + encodeURIComponent(keyList);
+  const res = await fetch(url);
+  return await res.json();
 }
-
-/* -------- Compression using DEFLATE + Z85 -------- */
-function compressTiny(obj) {
-    const json = JSON.stringify(obj);
-    const def = pako.deflate(json, { level: 9 });
-    return Z85.encoder(def); // No prefix needed
+async function db_get_all() {
+  // fallback: get entire DB (no action param)
+  const url = getBackend();
+  const res = await fetch(url);
+  return await res.json(); // mapping key->stringified-json
 }
-
-function decompressTiny(str) {
-    const raw = Z85.decoder(str);
-    const inflated = pako.inflate(raw);
-    return JSON.parse(new TextDecoder().decode(inflated));
+async function db_delete(key) {
+  const url = getBackend() + '?action=delete&key=' + encodeURIComponent(key);
+  try { const r = await fetch(url); return await r.json(); } catch(e){ return null; }
 }
 
-let pc, dc;
+/* -------------------------
+  WebRTC helpers
+   ------------------------- */
+let pc = null;
+let dataChannel = null;
+let connected = false;
+let hostOfferKey = null;
+let clientAnswerKey = null;
+let hostFoundAnswerKey = null;
+let pollInterval = null;
 
-/* -------- Display Function ---------- */
-function showString(str) {
-    document.getElementById("tinyStr").textContent = str;
-    document.getElementById("charCount").textContent =
-        "Length: " + str.length + " chars";
-    new QRCode(document.getElementById("qr"), {
-        text: str, width: 220, height: 220
-    });
+function createPeer() {
+  pc = new RTCPeerConnection();
+  // data channel handlers will be set by Host/Client flow
+  pc.onconnectionstatechange = () => {
+    const st = pc.connectionState;
+    setStatus('Peer state: ' + st);
+    if (st === 'connected') {
+      connected = true;
+      // show clipboard
+      document.getElementById('clipboardWrap').style.display = 'block';
+      // delete keys if present
+      if (hostOfferKey) db_delete(hostOfferKey);
+      if (clientAnswerKey) db_delete(clientAnswerKey);
+      if (hostFoundAnswerKey) db_delete(hostFoundAnswerKey);
+    }
+  };
 }
 
-/* -------- Host ---------- */
-async function startHost() {
-    pc = new RTCPeerConnection();
-    dc = pc.createDataChannel("x");
+// Wait until ICE gathering ends (or timeout)
+function waitIceGatheringComplete(pcRef, timeout = 5000) {
+  return new Promise(resolve => {
+    if (!pcRef) return resolve();
+    if (pcRef.iceGatheringState === 'complete') return resolve();
+    function handler() {
+      if (pcRef.iceGatheringState === 'complete') {
+        pcRef.removeEventListener('icegatheringstatechange', handler);
+        resolve();
+      }
+    }
+    pcRef.addEventListener('icegatheringstatechange', handler);
+    setTimeout(resolve, timeout);
+  });
+}
 
-    let out = {};
+/* -------------------------
+  HOST FLOW
+   ------------------------- */
+document.getElementById('hostBtn').addEventListener('click', async () => {
+  try {
+    activate('host');
+    setStatus('Creating peer + datachannel (host) ...');
+    createPeer();
 
-    pc.onicecandidate = e => {
-        if (e.candidate && !out.c) {
-            const c = e.candidate.candidate.replace("candidate:", "");
-            out = {
-                u: pc.localDescription.sdp.match(/ice-ufrag:(.+)/)[1],
-                p: pc.localDescription.sdp.match(/ice-pwd:(.+)/)[1],
-                c
-            };
-
-            const tiny = compressTiny(out);
-            showString(tiny);
-        }
+    // create datachannel and listeners
+    dataChannel = pc.createDataChannel('clipboard');
+    dataChannel.onopen = () => setStatus('DataChannel open (host)');
+    dataChannel.onmessage = (ev) => {
+      document.getElementById('recvClip').value = ev.data;
     };
 
+    // prepare offer
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
-}
 
-/* -------- Join ---------- */
-async function startJoin() {
-    pc = new RTCPeerConnection();
-    pc.ondatachannel = e => {
-        dc = e.channel;
-        dc.onmessage = m => console.log("Msg:", m.data);
-    };
-}
+    setStatus('Gathering ICE (host)...');
+    await waitIceGatheringComplete(pc, 6000);
 
-/* -------- Apply Remote ---------- */
-async function applyRemote() {
-    const tiny = document.getElementById("remoteStr").value.trim();
-    if (!tiny) return alert("Empty");
-
-    const data = decompressTiny(tiny);
-
-    let sdp;
-    if (document.getElementById("hostBtn").disabled) {
-        // HOST receives ANSWER
-        sdp = buildAnswerSDP(data.u, data.p, data.c);
-        await pc.setRemoteDescription({ type: "answer", sdp });
-    } else {
-        // JOIN receives OFFER
-        sdp = buildOfferSDP(data.u, data.p, data.c);
-        await pc.setRemoteDescription({ type: "offer", sdp });
-        const ans = await pc.createAnswer();
-        await pc.setLocalDescription(ans);
-
-        pc.onicecandidate = e => {
-            if (e.candidate) {
-                const c = e.candidate.candidate.replace("candidate:", "");
-                const out = {
-                    u: pc.localDescription.sdp.match(/ice-ufrag:(.+)/)[1],
-                    p: pc.localDescription.sdp.match(/ice-pwd:(.+)/)[1],
-                    c
-                };
-                const tiny2 = compressTiny(out);
-                showString(tiny2);
-            }
-        };
+    // store offer on backend as stringified object (Option B)
+    const payload = { offer: pc.localDescription }; // object with type & sdp
+    setStatus('Publishing offer to DB ...');
+    const dbRes = await db_set(payload);
+    // dbRes may be { key: 'abcd1234' } or { status:'ok', key: '...' }
+    const key = dbRes.key || dbRes.id || dbRes.result || dbRes.k || dbRes.K || null;
+    if (!key && dbRes.status === 'ok') {
+      // some backends return {status:'ok', message:'..', key:'..'}
+      // try to find any key-like prop:
+      for (const p in dbRes) if (p !== 'status' && typeof dbRes[p] === 'string') { key = dbRes[p]; break; }
     }
-}
+    if (!key && dbRes.key === undefined) {
+      // incompatible response
+      throw new Error('Backend did not return key on set (check backend response).');
+    }
+    hostOfferKey = dbRes.key || dbRes.id || dbRes.key || Object.values(dbRes)[0];
+    hostOfferKey = String(hostOfferKey);
+    document.getElementById('offerKey').textContent = hostOfferKey;
+    setStatus('Offer published: ' + hostOfferKey + ' — waiting for answer ...');
 
-/* -------- UI Hooks ---------- */
-document.getElementById("hostBtn").onclick = () => {
-    document.getElementById("hostBtn").disabled = true;
-    startHost();
-};
-document.getElementById("joinBtn").onclick = () => {
-    document.getElementById("joinBtn").disabled = true;
-    startJoin();
-};
-document.getElementById("applyBtn").onclick = applyRemote;
+    // Start polling the DB (get all) to find any entry with answer_to == hostOfferKey
+    pollInterval = setInterval(async () => {
+      try {
+        const all = await db_get_all();
+        // all is mapping key->stringValue
+        for (const k in all) {
+          const raw = all[k];
+          if (!raw) continue;
+          // raw is stringified JSON -> parse
+          let parsed;
+          try { parsed = JSON.parse(raw); } catch(e) { continue; }
+          if (parsed && parsed.answer_to === hostOfferKey && parsed.answer) {
+            // found the matching answer posted by client
+            hostFoundAnswerKey = k;
+            document.getElementById('foundAnswerKey').textContent = hostFoundAnswerKey;
+            setStatus('Answer found in DB: ' + hostFoundAnswerKey + ' — applying answer ...');
+
+            // apply remote answer
+            await pc.setRemoteDescription(parsed.answer);
+            clearInterval(pollInterval);
+            pollInterval = null;
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('poll error', e);
+      }
+    }, 1500);
+
+  } catch (err) {
+    console.error(err);
+    setStatus('Host error: ' + (err.message || err));
+  }
+});
+
+/* -------------------------
+  CLIENT FLOW
+   ------------------------- */
+document.getElementById('clientBtn').addEventListener('click', async () => {
+  try {
+    activate('client');
+    const hostKey = document.getElementById('clientOfferInput').value.trim();
+    if (!hostKey) return alert('Enter offer key from host');
+
+    setStatus('Fetching offer from DB ...');
+    // get that specific key
+    const got = await db_get_keys(hostKey);
+    if (!got || !got[hostKey]) {
+      setStatus('Offer not found for key: ' + hostKey);
+      return alert('Offer not found (server did not return data for key).');
+    }
+
+    // The backend stores JSON as a string (Option B), so parse
+    let parsed;
+    try { parsed = JSON.parse(got[hostKey]); } catch (e) {
+      setStatus('Failed to parse stored JSON for key ' + hostKey);
+      return alert('Stored DB value is not valid JSON string.');
+    }
+
+    if (!parsed || !parsed.offer) {
+      setStatus('Stored object missing offer field.');
+      return alert('DB record does not contain an "offer" field.');
+    }
+
+    // Build peer and set remote
+    createPeer();
+    pc.ondatachannel = (ev) => {
+      dataChannel = ev.channel;
+      dataChannel.onmessage = (ev) => { document.getElementById('recvClip').value = ev.data; };
+      dataChannel.onopen = () => setStatus('DataChannel open (client)');
+    };
+
+    setStatus('Applying remote offer ...');
+    await pc.setRemoteDescription(parsed.offer);
+
+    // create answer
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    setStatus('Gathering ICE (client)...');
+    await waitIceGatheringComplete(pc, 6000);
+
+    // store the answer in DB but tag it with answer_to: hostKey
+    const payload = { answer_to: hostKey, answer: pc.localDescription };
+    setStatus('Publishing answer to DB ...');
+    const dbRes = await db_set(payload);
+    clientAnswerKey = dbRes.key || dbRes.id || Object.values(dbRes)[0];
+    clientAnswerKey = String(clientAnswerKey);
+    document.getElementById('answerKey').textContent = clientAnswerKey;
+
+    setStatus('Answer published: ' + clientAnswerKey + ' — connection pending (host polling)');
+
+    // Optionally, we can also poll for host deletion of keys to confirm connection complete
+  } catch (err) {
+    console.error(err);
+    setStatus('Client error: ' + (err.message || err));
+  }
+});
+
+/* -------------------------
+  Clipboard actions
+   ------------------------- */
+document.getElementById('sendClip').addEventListener('input', () => {
+  if (dataChannel && dataChannel.readyState === 'open') {
+    dataChannel.send(document.getElementById('sendClip').value);
+  }
+});
+
+/* -------------------------
+  Reset activation when clicking outside blocks
+   ------------------------- */
+document.addEventListener('click', (e) => {
+  if (!hostBlock.contains(e.target) && !clientBlock.contains(e.target)) {
+    activate(null); // clear
+  }
+});
+
 </script>
-
 </body>
 </html>
