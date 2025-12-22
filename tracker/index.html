@@ -6,7 +6,7 @@
     <style>
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: #0b0e14; 
+            background: #1c2128; 
             color: #ffffff; 
             display: flex; 
             flex-direction: column; 
@@ -18,58 +18,97 @@
             -webkit-user-select: none;
             overflow: hidden;
         }
-        #status-display {
-            padding: 40px;
-            border-radius: 15px;
-            font-size: 3rem;
-            font-weight: bold;
+
+        /* Significantly increased Warning Sign */
+        #minimize-warning {
+            background: rgba(255, 69, 0, 0.2);
+            color: #ff4500;
+            padding: 20px 40px;
+            border: 3px solid #ff4500;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            font-weight: 900;
+            font-size: 1.5rem; /* Increased size */
+            letter-spacing: 2px;
+            text-transform: uppercase;
             text-align: center;
-            border: 4px solid #30363d;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            box-shadow: 0 0 20px rgba(255, 69, 0, 0.4);
+            animation: alert-glow 1.5s infinite;
         }
-        /* Green for Stable */
-        .stable { color: #3fb950; border-color: #3fb950 !important; box-shadow: 0 0 20px rgba(63, 185, 80, 0.3); }
-        /* Red for Dropped */
-        .dropped { color: #f85149; border-color: #f85149 !important; box-shadow: 0 0 20px rgba(248, 81, 73, 0.3); }
+
+        @keyframes alert-glow {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 69, 0, 0.4); }
+            50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(255, 69, 0, 0.7); opacity: 0.8; }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 69, 0, 0.4); }
+        }
+
+        #status-display {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: center;
+            border: 2px solid #444c56;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            letter-spacing: 0.5px;
+        }
+
+        .stable { 
+            color: #44d663; 
+            border-color: #44d663 !important; 
+            background: rgba(68, 214, 99, 0.1);
+        }
+        
+        .dropped { 
+            color: #ff6b6b; 
+            border-color: #ff6b6b !important; 
+            background: rgba(255, 107, 107, 0.1);
+        }
         
         #history-log { 
-            margin-top: 30px; 
-            width: 80%; 
-            max-width: 500px; 
-            height: 150px;
+            margin-top: 20px; 
+            width: 85%; 
+            max-width: 400px; 
+            height: 180px;
             overflow-y: auto;
-            font-family: monospace; 
-            font-size: 0.9rem; 
-            color: #8b949e;
-            border-top: 1px solid #30363d;
-            padding-top: 10px;
+            font-family: 'Consolas', 'Monaco', monospace; 
+            font-size: 0.8rem; 
+            color: #adbac7;
+            border: 1px solid #444c56;
+            background: #22272e;
+            padding: 10px;
+            border-radius: 6px;
         }
-        .log-line { padding: 2px 0; border-bottom: 1px solid #161b22; }
+        
+        #history-log::-webkit-scrollbar { width: 6px; }
+        #history-log::-webkit-scrollbar-thumb { background: #444c56; border-radius: 10px; }
+
+        .log-line { 
+            padding: 6px 0; 
+            border-bottom: 1px solid #2d333b;
+            display: flex;
+            justify-content: space-between;
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
+    <div id="minimize-warning">⚠️ SYSTEM CRITICAL: DO NOT MINIMIZE ⚠️</div>
+
     <div id="status-display">INITIALIZING...</div>
+    
     <div id="history-log"></div>
 
     <script>
-        /** * ANTI-INSPECTION LAYER
-         */
         document.onkeydown = function(e) {
             if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
                 return false;
             }
         };
 
-        /**
-         * ENCODED LOGIC LAYER
-         */
         (function() {
-            // Helper to decode "hidden" strings
             const _dec = (s) => atob(s);
-            
-            // Hidden keys: status-display, history-log, online, offline, stable, dropped
             const _k = {
                 ui: _dec('c3RhdHVzLWRpc3BsYXk='),
                 lg: _dec('aGlzdG9yeS1sb2c='),
@@ -85,15 +124,13 @@
                 const log = document.getElementById(_k.lg);
                 const ts = new Date().toLocaleTimeString();
 
-                // UI Update logic
-                el.innerText = state ? "STABLE CONNECTION" : "CONNECTION DROPPED";
+                el.innerText = state ? "● STABLE" : "○ DROPPED";
                 el.className = state ? _k.s : _k.d;
 
-                // Create log entry
                 const entry = document.createElement('div');
                 entry.className = 'log-line';
-                entry.style.color = state ? '#3fb950' : '#f85149';
-                entry.innerHTML = `[${ts}] > ${state ? 'STABLE' : 'DROPPED'}`;
+                entry.style.color = state ? '#44d663' : '#ff6b6b';
+                entry.innerHTML = `<span>[${ts}] STATUS_SYNC</span> <span>${state ? 'OK' : 'FAIL'}</span>`;
                 log.prepend(entry);
             }
 
