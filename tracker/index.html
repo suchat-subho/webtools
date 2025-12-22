@@ -2,90 +2,105 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Internet Status Logger</title>
+    <title>Network Security Monitor</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f4f4f9;
-            padding: 20px;
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #0b0e14; 
+            color: #ffffff; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none; 
+            -webkit-user-select: none;
+            overflow: hidden;
         }
-        #status-indicator {
-            padding: 20px 40px;
-            border-radius: 8px;
-            font-size: 1.5rem;
+        #status-display {
+            padding: 40px;
+            border-radius: 15px;
+            font-size: 3rem;
             font-weight: bold;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
+            text-align: center;
+            border: 4px solid #30363d;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
-        .online { background-color: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
-        .offline { background-color: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; }
+        /* Green for Stable */
+        .stable { color: #3fb950; border-color: #3fb950 !important; box-shadow: 0 0 20px rgba(63, 185, 80, 0.3); }
+        /* Red for Dropped */
+        .dropped { color: #f85149; border-color: #f85149 !important; box-shadow: 0 0 20px rgba(248, 81, 73, 0.3); }
         
-        #log-container {
-            width: 100%;
-            max-width: 500px;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            height: 300px;
+        #history-log { 
+            margin-top: 30px; 
+            width: 80%; 
+            max-width: 500px; 
+            height: 150px;
             overflow-y: auto;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-family: monospace; 
+            font-size: 0.9rem; 
+            color: #8b949e;
+            border-top: 1px solid #30363d;
+            padding-top: 10px;
         }
-        .log-entry {
-            border-bottom: 1px solid #eee;
-            padding: 5px 0;
-            font-family: monospace;
-        }
-        .timestamp { color: #666; font-size: 0.85rem; }
+        .log-line { padding: 2px 0; border-bottom: 1px solid #161b22; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
-    <h2>Network Connectivity Monitor</h2>
-
-    <div id="status-indicator">Checking...</div>
-
-    <div id="log-container">
-        <strong>Event Log:</strong>
-        <div id="logs"></div>
-    </div>
+    <div id="status-display">INITIALIZING...</div>
+    <div id="history-log"></div>
 
     <script>
-        const statusDisplay = document.getElementById('status-indicator');
-        const logsContainer = document.getElementById('logs');
+        /** * ANTI-INSPECTION LAYER
+         */
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
+                return false;
+            }
+        };
 
-        function updateStatus() {
-            const isOnline = navigator.onLine;
-            const status = isOnline ? "ONLINE" : "OFFLINE";
-            const timestamp = new Date().toLocaleTimeString();
-
-            // 1. Update the UI Indicator
-            statusDisplay.textContent = `Current Status: ${status}`;
-            statusDisplay.className = isOnline ? 'online' : 'offline';
-
-            // 2. Add to Log
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            entry.innerHTML = `<span class="timestamp">[${timestamp}]</span> 
-                               <span style="color: ${isOnline ? 'green' : 'red'}">${status}</span>`;
+        /**
+         * ENCODED LOGIC LAYER
+         */
+        (function() {
+            // Helper to decode "hidden" strings
+            const _dec = (s) => atob(s);
             
-            // Prepend so newest is at the top
-            logsContainer.prepend(entry);
-            
-            // 3. Console Log (Optional)
-            console.log(`[${timestamp}] User is ${status}`);
-        }
+            // Hidden keys: status-display, history-log, online, offline, stable, dropped
+            const _k = {
+                ui: _dec('c3RhdHVzLWRpc3BsYXk='),
+                lg: _dec('aGlzdG9yeS1sb2c='),
+                on: _dec('b25saW5l'),
+                off: _dec('b2ZmbGluZQ=='),
+                s: _dec('c3RhYmxl'),
+                d: _dec('ZHJvcHBlZA==')
+            };
 
-        // Listen for changes
-        window.addEventListener('online', updateStatus);
-        window.addEventListener('offline', updateStatus);
+            function sync() {
+                const state = navigator.onLine;
+                const el = document.getElementById(_k.ui);
+                const log = document.getElementById(_k.lg);
+                const ts = new Date().toLocaleTimeString();
 
-        // Initial check on page load
-        updateStatus();
+                // UI Update logic
+                el.innerText = state ? "STABLE CONNECTION" : "CONNECTION DROPPED";
+                el.className = state ? _k.s : _k.d;
+
+                // Create log entry
+                const entry = document.createElement('div');
+                entry.className = 'log-line';
+                entry.style.color = state ? '#3fb950' : '#f85149';
+                entry.innerHTML = `[${ts}] > ${state ? 'STABLE' : 'DROPPED'}`;
+                log.prepend(entry);
+            }
+
+            window.addEventListener(_k.on, sync);
+            window.addEventListener(_k.off, sync);
+            sync();
+        })();
     </script>
 </body>
 </html>
