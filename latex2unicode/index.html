@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>LaTeX → Unicode Converter</title>
+
+  <!-- Main site theme -->
+  <link rel="stylesheet" href="../style.css">
+  <!-- Converter-specific styling -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1 style="text-align:center; color:#FCBA03;">LaTeX → Unicode Converter</h1>
+
+  <!-- Full-width converter container -->
+  <div class="keep-container fullwidth">
+    <div class="course-note">
+      <textarea id="urlInput" placeholder="Enter LaTeX, e.g. \frac{1}{2} + \mathbb{R}"></textarea>
+      <button onclick="convertToUnicode()">Convert</button>
+
+      <div id="status" >Output will appear here</div>
+      <button onclick="copyUnicode()">Copy</button>
+    </div>
+  </div>
+
+  <!-- External JS logic -->
+  <script src="scripts/converter.js"></script>
+</body>
+</html>
