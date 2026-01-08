@@ -9,7 +9,14 @@ const latexToUnicode = {
     "\\Psi":"Ψ","\\Omega":"Ω","\\times":"×","\\div":"÷","\\pm":"±",
     "\\mp":"∓","\\leq":"≤","\\geq":"≥","\\neq":"≠","\\approx":"≈",
     "\\infty":"∞","\\sum":"∑","\\prod":"∏","\\int":"∫","\\sqrt":"√",
-    "\\in":"∈"
+    "\\in":"∈","\\notin": "∉",
+    "\\subset": "⊂","\\subseteq": "⊆","\\supset": "⊃","\\supseteq": "⊇","\\cup": "∪","\\cap": "∩",
+    "\\setminus": "∖", "\\nsubseteq": "⊄", "\\nsupseteq": "⊅",
+    "\\emptyset": "∅","\\varnothing": "∅",
+    "\\exists": "∃","\\forall": "∀","\\ni": "∋",
+    "\\le": "≤", "\\leq": "≤", "\\ge": "≥", "\\geq": "≥","\\neq": "≠",
+    "\\ne": "≠","\\approx": "≈","\\sim": "∼","\\simeq": "≃","\\equiv": "≡",
+    "\\cong": "≅","\\propto": "∝","\\lt": "<","\\gt": ">","\\ll": "≪","\\gg": "≫"
 };
 
 // Superscripts and subscripts
@@ -26,6 +33,20 @@ const fractionMap = {
     "1/6":"⅙","5/6":"⅚",
     "1/8":"⅛","3/8":"⅜","5/8":"⅝","7/8":"⅞"
 };
+
+
+let liveMode = true;
+
+function toggleLiveMode() {
+    liveMode = !liveMode;
+    document.getElementById("liveToggle").innerText =
+        liveMode ? "Live Mode: ON" : "Live Mode: OFF";
+}
+
+document.getElementById("urlInput").addEventListener("input", () => {
+    if (liveMode) convertToUnicode();
+});
+
 
 function convertToUnicode() {
     let input = document.getElementById("urlInput").value;

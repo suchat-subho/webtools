@@ -18,7 +18,8 @@
   <!-- Full-width converter container -->
   <div class="keep-container fullwidth">
     <div class="course-note">
-      <textarea id="urlInput" oninput="convertToUnicode()" placeholder="Enter LaTeX, e.g. \frac{1}{2} + \mathbb{R}"></textarea>
+      <button id="liveToggle" onclick="toggleLiveMode()">Live Mode: ON</button>
+      <textarea id="urlInput" placeholder="Enter LaTeX, e.g. \frac{1}{2} + \mathbb{R}"></textarea>
       <button onclick="convertToUnicode()">Convert</button>
 
       <div id="status" >Output will appear here</div>
