@@ -37,7 +37,7 @@ const logicProof = {
 };
 const calculus = {
   "\\sum":"∑","\\prod":"∏","\\int":"∫",
-  "\\propto":"∝","\\npropto":"∝"
+  "\\propto":"∝","\\npropto":"∝̸"
 };
 
 const latexToUnicode = {
