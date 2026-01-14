@@ -1,4 +1,57 @@
 // LaTeX → Unicode symbols
+const greekLower = {
+  "\\alpha":"α","\\beta":"β","\\gamma":"γ","\\delta":"δ","\\epsilon":"ε",
+  "\\zeta":"ζ","\\eta":"η","\\theta":"θ","\\iota":"ι","\\kappa":"κ",
+  "\\lambda":"λ","\\mu":"μ","\\nu":"ν","\\xi":"ξ","\\pi":"π","\\rho":"ρ",
+  "\\sigma":"σ","\\tau":"τ","\\upsilon":"υ","\\phi":"φ","\\chi":"χ",
+  "\\psi":"ψ","\\omega":"ω"
+};
+const greekUpper = {
+  "\\Gamma":"Γ","\\Delta":"Δ","\\Theta":"Θ","\\Lambda":"Λ",
+  "\\Xi":"Ξ","\\Pi":"Π","\\Sigma":"Σ","\\Phi":"Φ",
+  "\\Psi":"Ψ","\\Omega":"Ω"
+};
+const arithmeticOps = {
+  "\\times":"×","\\div":"÷","\\pm":"±","\\mp":"∓",
+  "\\sqrt":"√","\\infty":"∞"
+};
+const relations = {
+  "\\lt":"<","\\gt":">","\\le":"≤","\\leq":"≤",
+  "\\ge":"≥","\\geq":"≥","\\neq":"≠","\\ne":"≠",
+  "\\approx":"≈","\\sim":"∼","\\simeq":"≃",
+  "\\equiv":"≡","\\cong":"≅",
+  "\\ll":"≪","\\gg":"≫"
+};
+const setTheory = {
+  "\\in":"∈","\\notin":"∉","\\ni":"∋",
+  "\\subset":"⊂","\\subseteq":"⊆","\\nsubseteq":"⊄",
+  "\\supset":"⊃","\\supseteq":"⊇","\\nsupseteq":"⊅",
+  "\\cup":"∪","\\cap":"∩","\\setminus":"∖",
+  "\\emptyset":"∅","\\varnothing":"∅"
+};
+const logicProof = {
+  "\\forall":"∀","\\exists":"∃",
+  "\\therefore":"∴","\\because":"∵",
+  "\\implies":"⟹","\\Rightarrow":"⇒","\\Leftrightarrow":"⇔",
+  "\\qed":"□"
+};
+const calculus = {
+  "\\sum":"∑","\\prod":"∏","\\int":"∫",
+  "\\propto":"∝","\\npropto":"∝"
+};
+
+const latexToUnicode = {
+  ...greekLower,
+  ...greekUpper,
+  ...arithmeticOps,
+  ...relations,
+  ...setTheory,
+  ...logicProof,
+  ...calculus
+};
+
+
+/*
 const latexToUnicode = {
     "\\alpha":"α","\\beta":"β","\\gamma":"γ","\\delta":"δ","\\epsilon":"ε",
     "\\zeta":"ζ","\\eta":"η","\\theta":"θ","\\iota":"ι","\\kappa":"κ",
@@ -20,6 +73,9 @@ const latexToUnicode = {
     "\\ne": "≠","\\approx": "≈","\\sim": "∼","\\simeq": "≃","\\equiv": "≡",
     "\\cong": "≅","\\propto": "∝","\\lt": "<","\\gt": ">","\\ll": "≪","\\gg": "≫"
 };
+*/
+
+
 
 // Superscripts and subscripts
 const superscripts = {"0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹","+":"⁺","-":"⁻","=":"⁼","(":"⁽",")":"⁾","n":"ⁿ","i":"ⁱ"};

@@ -1,3 +1,46 @@
+#menuBtn {
+  position: fixed;
+  top: 15px;
+  right: 20px;
+  font-size: 26px;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+}
+
+.modal-content {
+  background: #fff;
+  width: 60%;
+  margin: 8% auto;
+  padding: 20px;
+  border-radius: 8px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.close {
+  float: right;
+  cursor: pointer;
+  font-size: 22px;
+}
+
+#Symbols li {
+  cursor: pointer;
+  padding: 6px;
+}
+
+#Symbols li:hover {
+  background: #f0f0f0;
+}
+/*****************************************/
+
 #urlInput {
   width: 90%;
   padding: 10px;
