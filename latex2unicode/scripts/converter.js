@@ -163,3 +163,73 @@ function convertToUnicode() {
 // Helper functions
 function toSup(str){ return [...str].map(c => superscripts[c]||c).join(''); }
 function toSub(str){ return [...str].map(c => subscripts[c]||c).join(''); }
+function insertAtCursor(text) {
+    const input = document.getElementById("urlInput");
+    input.focus();
+
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+
+    input.value =
+        input.value.slice(0, start) +
+        text +
+        input.value.slice(end);
+
+    // Move cursor after inserted text
+    input.selectionStart = input.selectionEnd = start + text.length;
+
+    // Trigger live conversion if enabled
+    if (liveMode) convertToUnicode();
+}
+//////////////////////////////////////////////////////////////////////////
+document.addEventListener("DOMContentLoaded", () => {
+    const menuBtn = document.getElementById("menuBtn");
+    const modal = document.getElementById("classModal");
+    const closeBtn = document.querySelector(".close");
+    const Symbols = document.getElementById("Symbols");
+    const inputBox = document.getElementById("urlInput");
+
+    inputBox.addEventListener("input", () => {
+        if (liveMode) convertToUnicode();
+    });
+
+    menuBtn.onclick = () => {
+        Symbols.innerHTML = "";
+        buildSymbolModal();
+        modal.style.display = "block";
+    };
+
+    closeBtn.onclick = () => modal.style.display = "none";
+
+    window.onclick = (e) => {
+        if (e.target === modal) modal.style.display = "none";
+    };
+
+    function buildSymbolModal() {
+        addGroup("Greek (lowercase)", greekLower);
+        addGroup("Greek (uppercase)", greekUpper);
+        addGroup("Arithmetic", arithmeticOps);
+        addGroup("Relations", relations);
+        addGroup("Set Theory", setTheory);
+        addGroup("Logic & Proof", logicProof);
+        addGroup("Calculus", calculus);
+    }
+
+    function addGroup(title, groupObj) {
+        const header = document.createElement("div");
+        header.className = "symbol-group";
+        header.textContent = title;
+        Symbols.appendChild(header);
+
+        for (const latex in groupObj) {
+            const item = document.createElement("div");
+            item.className = "symbol-item";
+            item.innerHTML = `
+              <span class="symbol-latex">${latex}</span>
+              <span class="symbol-char">${groupObj[latex]}</span>
+            `;
+            item.onclick = () => insertAtCursor(latex);
+            Symbols.appendChild(item);
+        }
+    }
+});

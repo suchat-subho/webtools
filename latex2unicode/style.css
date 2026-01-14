@@ -40,6 +40,41 @@
   background: #f0f0f0;
 }
 /*****************************************/
+.symbol-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 6px 10px;
+  font-size: 14px;
+}
+
+.symbol-group {
+  grid-column: 1 / -1;
+  font-weight: bold;
+  margin-top: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.symbol-item {
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.symbol-item:hover {
+  background: #f2f2f2;
+}
+
+.symbol-latex {
+  color: #555;
+  font-family: monospace;
+}
+
+.symbol-char {
+  font-size: 18px;
+  margin-left: 4px;
+}
+/*****************************************/
 
 #urlInput {
   width: 90%;
