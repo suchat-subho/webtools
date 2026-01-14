@@ -36,7 +36,7 @@ const logicProof = {
   "\\qed":"□"
 };
 const calculus = {
-  "\\sum":"∑","\\prod":"∏","\\int":"∫","\oint":"∮",
+  "\\sum":"∑","\\prod":"∏","\\int":"∫","\\oint":"∮",
   "\\propto":"∝","\\npropto":"∝̸"
 };
 
