@@ -1,4 +1,5 @@
-// LaTeX → Unicode symbols
+// ================= LaTeX → Unicode Maps =================
+
 const greekLower = {
   "\\alpha":"α","\\beta":"β","\\gamma":"γ","\\delta":"δ","\\epsilon":"ε",
   "\\zeta":"ζ","\\eta":"η","\\theta":"θ","\\iota":"ι","\\kappa":"κ",
@@ -6,22 +7,51 @@ const greekLower = {
   "\\sigma":"σ","\\tau":"τ","\\upsilon":"υ","\\phi":"φ","\\chi":"χ",
   "\\psi":"ψ","\\omega":"ω"
 };
+
 const greekUpper = {
   "\\Gamma":"Γ","\\Delta":"Δ","\\Theta":"Θ","\\Lambda":"Λ",
   "\\Xi":"Ξ","\\Pi":"Π","\\Sigma":"Σ","\\Phi":"Φ",
   "\\Psi":"Ψ","\\Omega":"Ω"
 };
+
 const arithmeticOps = {
   "\\times":"×","\\div":"÷","\\pm":"±","\\mp":"∓",
   "\\sqrt":"√","\\infty":"∞"
 };
+
+const accents = {
+  "\\hat": "\u0302",        // ̂  combining circumflex
+  "\\bar": "\u0304",        // ̄  combining macron
+  "\\vec": "\u20D7",        // ⃗  combining right arrow above
+  "\\dot": "\u0307",        // ̇  combining dot above
+  "\\ddot": "\u0308",       // ̈  combining diaeresis
+  "\\tilde": "\u0303",      // ̃  combining tilde
+  "\\underline": "\u0332"   // ̲  combining low line
+};
+
+// Blackboard bold letters (uppercase only)
+const mathbbMap = {"A":"𝔸","B":"𝔹","C":"ℂ","D":"𝔻","E":"𝔼","F":"𝔽","G":"𝔾","H":"ℍ","I":"𝕀","J":"𝕁","K":"𝕂","L":"𝕃","M":"𝕄","N":"ℕ","O":"𝕆","P":"ℙ","Q":"ℚ","R":"ℝ","S":"𝕊","T":"𝕋","U":"𝕌","V":"𝕍","W":"𝕎","X":"𝕏","Y":"𝕐","Z":"ℤ"};
+// Unicode fractions
+
+
+
+const fractionMap = {
+    "1/2":"½","1/3":"⅓","2/3":"⅔","1/4":"¼","3/4":"¾",
+    "1/5":"⅕","2/5":"⅖","3/5":"⅗","4/5":"⅘",
+    "1/6":"⅙","5/6":"⅚",
+    "1/8":"⅛","3/8":"⅜","5/8":"⅝","7/8":"⅞"
+};
+
 const relations = {
-  "\\lt":"<","\\gt":">","\\le":"≤","\\leq":"≤",
-  "\\ge":"≥","\\geq":"≥","\\neq":"≠","\\ne":"≠",
+  "\\lt":"<","\\gt":">",
+  "\\le":"≤","\\leq":"≤",
+  "\\ge":"≥","\\geq":"≥",
+  "\\neq":"≠","\\ne":"≠",
   "\\approx":"≈","\\sim":"∼","\\simeq":"≃",
   "\\equiv":"≡","\\cong":"≅",
   "\\ll":"≪","\\gg":"≫"
 };
+
 const setTheory = {
   "\\in":"∈","\\notin":"∉","\\ni":"∋",
   "\\subset":"⊂","\\subseteq":"⊆","\\nsubseteq":"⊄",
@@ -29,15 +59,21 @@ const setTheory = {
   "\\cup":"∪","\\cap":"∩","\\setminus":"∖",
   "\\emptyset":"∅","\\varnothing":"∅"
 };
+
 const logicProof = {
   "\\forall":"∀","\\exists":"∃",
   "\\therefore":"∴","\\because":"∵",
   "\\implies":"⟹","\\Rightarrow":"⇒","\\Leftrightarrow":"⇔",
   "\\qed":"□"
 };
+
 const calculus = {
   "\\sum":"∑","\\prod":"∏","\\int":"∫","\\oint":"∮",
   "\\propto":"∝","\\npropto":"∝̸"
+};
+
+const largemath={
+    "\\sumtop":"⎲","\\sumbot":"⎳"
 };
 
 const latexToUnicode = {
@@ -45,52 +81,19 @@ const latexToUnicode = {
   ...greekUpper,
   ...arithmeticOps,
   ...relations,
+  ...fractionMap,
   ...setTheory,
   ...logicProof,
-  ...calculus
+  ...calculus,
+  ...accents,
+  ...largemath
 };
-
-
-/*
-const latexToUnicode = {
-    "\\alpha":"α","\\beta":"β","\\gamma":"γ","\\delta":"δ","\\epsilon":"ε",
-    "\\zeta":"ζ","\\eta":"η","\\theta":"θ","\\iota":"ι","\\kappa":"κ",
-    "\\lambda":"λ","\\mu":"μ","\\nu":"ν","\\xi":"ξ","\\pi":"π","\\rho":"ρ",
-    "\\sigma":"σ","\\tau":"τ","\\upsilon":"υ","\\phi":"φ","\\chi":"χ",
-    "\\psi":"ψ","\\omega":"ω","\\Gamma":"Γ","\\Delta":"Δ","\\Theta":"Θ",
-    "\\Lambda":"Λ","\\Xi":"Ξ","\\Pi":"Π","\\Sigma":"Σ","\\Phi":"Φ",
-    "\\Psi":"Ψ","\\Omega":"Ω","\\times":"×","\\div":"÷","\\pm":"±",
-    "\\mp":"∓","\\leq":"≤","\\geq":"≥","\\neq":"≠","\\approx":"≈",
-    "\\infty":"∞","\\sum":"∑","\\prod":"∏","\\int":"∫","\\sqrt":"√",
-    "\\in":"∈","\\notin": "∉", 
-    "\\therefore": "∴", "\\because": "∵", "\\implies": "⟹", "\\Rightarrow": "⇒","\\Leftrightarrow":"⇔",
-    "\\qed":"□", "\\propto":"∝","\\npropto": "∝",
-    "\\subset": "⊂","\\subseteq": "⊆","\\supset": "⊃","\\supseteq": "⊇","\\cup": "∪","\\cap": "∩",
-    "\\setminus": "∖", "\\nsubseteq": "⊄", "\\nsupseteq": "⊅",
-    "\\emptyset": "∅","\\varnothing": "∅",
-    "\\exists": "∃","\\forall": "∀","\\ni": "∋",
-    "\\le": "≤", "\\leq": "≤", "\\ge": "≥", "\\geq": "≥","\\neq": "≠",
-    "\\ne": "≠","\\approx": "≈","\\sim": "∼","\\simeq": "≃","\\equiv": "≡",
-    "\\cong": "≅","\\propto": "∝","\\lt": "<","\\gt": ">","\\ll": "≪","\\gg": "≫"
-};
-*/
-
 
 
 // Superscripts and subscripts
 const superscripts = {"0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹","+":"⁺","-":"⁻","=":"⁼","(":"⁽",")":"⁾","n":"ⁿ","i":"ⁱ"};
 const subscripts = {"0":"₀","1":"₁","2":"₂","3":"₃","4":"₄","5":"₅","6":"₆","7":"₇","8":"₈","9":"₉","+":"₊","-":"₋","=":"₌","(":"₍",")":"₎","a":"ₐ","e":"ₑ","h":"ₕ","i":"ᵢ","j":"ⱼ","k":"ₖ","l":"ₗ","m":"ₘ","n":"ₙ","o":"ₒ","p":"ₚ","r":"ᵣ","s":"ₛ","t":"ₜ","u":"ᵤ","v":"ᵥ","x":"ₓ"};
 
-// Blackboard bold letters (uppercase only)
-const mathbbMap = {"A":"𝔸","B":"𝔹","C":"ℂ","D":"𝔻","E":"𝔼","F":"𝔽","G":"𝔾","H":"ℍ","I":"𝕀","J":"𝕁","K":"𝕂","L":"𝕃","M":"𝕄","N":"ℕ","O":"𝕆","P":"ℙ","Q":"ℚ","R":"ℝ","S":"𝕊","T":"𝕋","U":"𝕌","V":"𝕍","W":"𝕎","X":"𝕏","Y":"𝕐","Z":"ℤ"};
-
-// Unicode fractions
-const fractionMap = {
-    "1/2":"½","1/3":"⅓","2/3":"⅔","1/4":"¼","3/4":"¾",
-    "1/5":"⅕","2/5":"⅖","3/5":"⅗","4/5":"⅘",
-    "1/6":"⅙","5/6":"⅚",
-    "1/8":"⅛","3/8":"⅜","5/8":"⅝","7/8":"⅞"
-};
 
 
 let liveMode = true;
@@ -213,6 +216,8 @@ document.addEventListener("DOMContentLoaded", () => {
         addGroup("Set Theory", setTheory);
         addGroup("Logic & Proof", logicProof);
         addGroup("Calculus", calculus);
+        addGroup("Accents", accents);
+        addGroup("LargeMath", largemath);
     }
 
     function addGroup(title, groupObj) {
