@@ -72,8 +72,11 @@ const calculus = {
   "\\propto":"∝","\\npropto":"∝̸"
 };
 
-const largemath={
-    "\\sumtop":"⎲","\\sumbot":"⎳"
+const largemath = {
+    "\\sumtop": "⎲", "\\sumbot": "⎳",
+    "\\lbraceTop": "⎧","\\lbraceMid": "⎨","\\lbraceBot": "⎩",
+    "\\rbraceTop": "⎫","\\rbraceMid": "⎬","\\rbraceBot": "⎭",
+    "\\inttop": "⌠","\\intbot": "⌡"
 };
 
 const latexToUnicode = {
