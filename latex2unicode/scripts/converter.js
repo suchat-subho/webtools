@@ -215,6 +215,27 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     function buildSymbolModal() {
+         // Add a Unicode number input at the top
+        const unicodeDiv = document.createElement("div");
+        unicodeDiv.className = "unicode-input";
+        unicodeDiv.innerHTML = `
+            <label>Insert Unicode (hex): </label>
+            <input id="unicodeCode" type="text" placeholder="e.g. 03B1">
+            <button id="unicodeInsert">Insert</button>
+        `;
+        Symbols.appendChild(unicodeDiv);
+         document.getElementById("unicodeInsert").onclick = () => {
+            const code = document.getElementById("unicodeCode").value.trim();
+            if (code) {
+                try {
+                    const char = String.fromCodePoint(parseInt(code, 16));
+                    insertAtCursor(char);
+                    document.getElementById("unicodeCode").value = "";
+                } catch (e) {
+                    alert("Invalid Unicode code point!");
+                }
+            }
+        };
         addGroup("Greek (lowercase)", greekLower);
         addGroup("Greek (uppercase)", greekUpper);
         addGroup("Arithmetic", arithmeticOps);
