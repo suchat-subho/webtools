@@ -112,9 +112,12 @@ document.getElementById("urlInput").addEventListener("input", () => {
 function convertToUnicode() {
     let input = document.getElementById("urlInput").value;
 
-    // Replace LaTeX symbols
-    for (const [key,value] of Object.entries(latexToUnicode)) {
-        input = input.split(key).join(value);
+    // Replace LaTeX symbols (longest first)
+    const latexKeys = Object.keys(latexToUnicode)
+        .sort((a, b) => b.length - a.length);
+
+    for (const key of latexKeys) {
+        input = input.split(key).join(latexToUnicode[key]);
     }
 
     // Fractions: Unicode if common, else superscript numerator + fraction slash + subscript denominator
@@ -184,7 +187,7 @@ function insertAtCursor(text) {
     // Trigger live conversion if enabled
     if (liveMode) convertToUnicode();
 }
-//////////////////////////////////////////////////////////////////////////
+// ================= Modal  =================
 document.addEventListener("DOMContentLoaded", () => {
     const menuBtn = document.getElementById("menuBtn");
     const modal = document.getElementById("classModal");
