@@ -1,3 +1,9 @@
+const spacingCommands = {
+    "\\quad":  "    ",      // 4 spaces
+    "\\qquad": "        "   // 8 spaces
+};
+
+
 // ================= LaTeX → Unicode Maps =================
 
 const greekLower = {
@@ -80,6 +86,7 @@ const largemath = {
 };
 
 const latexToUnicode = {
+  ...spacingCommands,
   ...greekLower,
   ...greekUpper,
   ...arithmeticOps,

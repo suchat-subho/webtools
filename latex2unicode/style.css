@@ -1,3 +1,7 @@
+#status {
+    font-family: "JetBrains Mono", monospace;
+    white-space: pre-wrap;
+}
 #menuBtn {
   position: fixed;
   top: 15px;
