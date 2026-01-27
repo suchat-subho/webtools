@@ -37,10 +37,33 @@ const accents = {
 
 // Blackboard bold letters (uppercase only)
 const mathbbMap = {"A":"𝔸","B":"𝔹","C":"ℂ","D":"𝔻","E":"𝔼","F":"𝔽","G":"𝔾","H":"ℍ","I":"𝕀","J":"𝕁","K":"𝕂","L":"𝕃","M":"𝕄","N":"ℕ","O":"𝕆","P":"ℙ","Q":"ℚ","R":"ℝ","S":"𝕊","T":"𝕋","U":"𝕌","V":"𝕍","W":"𝕎","X":"𝕏","Y":"𝕐","Z":"ℤ"};
+
+// Calligraphic
+const mathcalMap = {
+  "A":"𝒜","B":"ℬ","C":"𝒞","D":"𝒟","E":"ℰ","F":"ℱ","G":"𝒢",
+  "H":"ℋ","I":"ℐ","J":"𝒥","K":"𝒦","L":"ℒ","M":"ℳ","N":"𝒩",
+  "O":"𝒪","P":"𝒫","Q":"𝒬","R":"ℛ","S":"𝒮","T":"𝒯","U":"𝒰",
+  "V":"𝒱","W":"𝒲","X":"𝒳","Y":"𝒴","Z":"𝒵"
+};
+
+// handwritten-style
+const mathscriptMap = {
+  "A":"𝓐","B":"𝓑","C":"𝓒","D":"𝓓","E":"𝓔","F":"𝓕","G":"𝓖",
+  "H":"𝓗","I":"𝓘","J":"𝓙","K":"𝓚","L":"𝓛","M":"𝓜","N":"𝓝",
+  "O":"𝓞","P":"𝓟","Q":"𝓠","R":"𝓡","S":"𝓢","T":"𝓣","U":"𝓤",
+  "V":"𝓥","W":"𝓦","X":"𝓧","Y":"𝓨","Z":"𝓩"
+};
+
+//  Fraktur
+const mathfrakMap = {
+  "A":"𝔄","B":"𝔅","C":"ℭ","D":"𝔇","E":"𝔈","F":"𝔉","G":"𝔊",
+  "H":"ℌ","I":"ℑ","J":"𝔍","K":"𝔎","L":"𝔏","M":"𝔐","N":"𝔑",
+  "O":"𝔒","P":"𝔓","Q":"𝔔","R":"ℜ","S":"𝔖","T":"𝔗","U":"𝔘",
+  "V":"𝔙","W":"𝔚","X":"𝔛","Y":"𝔜","Z":"ℨ"
+};
+
+
 // Unicode fractions
-
-
-
 const fractionMap = {
     "1/2":"½","1/3":"⅓","2/3":"⅔","1/4":"¼","3/4":"¾",
     "1/5":"⅕","2/5":"⅖","3/5":"⅗","4/5":"⅘",
@@ -169,8 +192,17 @@ function convertToUnicode() {
     input = input.replace(/∏_{([^}]+)}\^{([^}]+)}/g, (_, sub, sup) => `∏${toSub(sub)}${toSup(sup)}`);
     input = input.replace(/∫_{([^}]+)}\^{([^}]+)}/g, (_, sub, sup) => `∫${toSub(sub)}${toSup(sup)}`);
 
+    ///  Math Styles
     // Blackboard bold
     input = input.replace(/\\mathbb\{([A-Z])\}/g, (_, letter) => mathbbMap[letter] || letter);
+    // Calligraphic
+    input = input.replace(/\\mathcal\{([A-Z])\}/g, (_, letter) => mathcalMap[letter] || letter);
+    // handwritten-style
+    input = input.replace(/\\mathscript\{([A-Z])\}/g, (_, letter) => mathscriptMap[letter] || letter);
+    //  Fraktur
+    input = input.replace(/\\mathfrak\{([A-Z])\}/g, (_, letter) => mathfrakMap[letter] || letter);
+    ////////////////////////////////
+
     input = input.replace(/\\\\/g, '\n');
 
     document.getElementById("status").innerText = input;
