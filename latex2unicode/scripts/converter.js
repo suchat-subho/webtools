@@ -102,11 +102,25 @@ const calculus = {
 };
 
 const largemath = {
-    "\\sumtop": "⎲", "\\sumbot": "⎳",
-    "\\lbraceTop": "⎧","\\lbraceMid": "⎨","\\lbraceBot": "⎩",
-    "\\rbraceTop": "⎫","\\rbraceMid": "⎬","\\rbraceBot": "⎭",
-    "\\inttop": "⌠","\\intbot": "⌡"
+  // Sum
+  "\\sumtop": "⎲","\\sumbot": "⎳",
+
+  // Curly braces
+  "\\lbraceTop": "⎧","\\lbraceMid": "⎨","\\lbraceBot": "⎩",
+  "\\rbraceTop": "⎫","\\rbraceMid": "⎬","\\rbraceBot": "⎭",
+
+  // Square brackets
+  "\\lbracketTop": "⎡","\\lbracketMid": "⎢","\\lbracketBot": "⎣",
+  "\\rbracketTop": "⎤","\\rbracketMid": "⎥","\\rbracketBot": "⎦",
+
+  // Parentheses
+  "\\lparenTop": "⎛","\\lparenMid": "⎜","\\lparenBot": "⎝",
+  "\\rparenTop": "⎞","\\rparenMid": "⎟","\\rparenBot": "⎠",
+
+  // Integrals
+  "\\inttop": "⌠","\\intbot": "⌡"
 };
+
 
 const latexToUnicode = {
   ...spacingCommands,
