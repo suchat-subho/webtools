@@ -35,6 +35,15 @@ const accents = {
   "\\underline": "\u0332"   // ̲  combining low line
 };
 
+// Footnote marks
+const footnoteMarks = {
+  "\\ast":"*","\\dagger":"†","\\ddagger":"‡",
+  "\\S":"§","\\P":"¶","\\parallel":"‖",
+  "\\asterism":"⁂","\\bullet":"•","\\reference":"※",
+  "\\lowast":"⁎","\\star":"⋆"
+};
+
+
 // Blackboard bold letters (uppercase only)
 const mathbbMap = {"A":"𝔸","B":"𝔹","C":"ℂ","D":"𝔻","E":"𝔼","F":"𝔽","G":"𝔾","H":"ℍ","I":"𝕀","J":"𝕁","K":"𝕂","L":"𝕃","M":"𝕄","N":"ℕ","O":"𝕆","P":"ℙ","Q":"ℚ","R":"ℝ","S":"𝕊","T":"𝕋","U":"𝕌","V":"𝕍","W":"𝕎","X":"𝕏","Y":"𝕐","Z":"ℤ"};
 
@@ -133,7 +142,8 @@ const latexToUnicode = {
   ...logicProof,
   ...calculus,
   ...accents,
-  ...largemath
+  ...largemath,
+  ...footnoteMarks
 };
 
 
@@ -272,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const unicodeDiv = document.createElement("div");
         unicodeDiv.className = "unicode-input";
         unicodeDiv.innerHTML = `
-            <label>Insert Unicode (hex): </label>
+            <center><label>Insert Unicode (hex): </label></center>
             <input id="unicodeCode" type="text" placeholder="e.g. 03B1">
             <button id="unicodeInsert">Insert</button>
         `;
