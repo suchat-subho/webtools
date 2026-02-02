@@ -253,8 +253,9 @@ function insertAtCursor(text) {
     // Trigger live conversion if enabled
     if (liveMode) convertToUnicode();
 }
+
 // ================= Modal  =================
-document.addEventListener("DOMContentLoaded", () => {
+/*document.addEventListener("DOMContentLoaded", () => {
     const menuBtn = document.getElementById("menuBtn");
     const modal = document.getElementById("classModal");
     const closeBtn = document.querySelector(".close");
@@ -327,4 +328,26 @@ document.addEventListener("DOMContentLoaded", () => {
             Symbols.appendChild(item);
         }
     }
-});
+} */
+//);
+// ================= Expose symbols for modal =================
+window.symbolGroups = {
+    greekLower,
+    greekUpper,
+    arithmeticOps,
+    relations,
+    setTheory,
+    logicProof,
+    calculus,
+    accents,
+    largemath,
+    footnoteMarks
+};
+
+window.insertAtCursor = insertAtCursor;
+window.convertToUnicode = convertToUnicode;
+window.liveModeRef = () => liveMode;
+
+
+
+
