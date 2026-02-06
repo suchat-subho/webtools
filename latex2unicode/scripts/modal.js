@@ -1,141 +1,103 @@
-// ================= Modal =================
+// ================= Symbol Toolbar + Modals =================
 document.addEventListener("DOMContentLoaded", () => {
-    /// Symbol bar Start
-    const symbolGroupList = [
-      ["Greek (lowercase)", symbolGroups.greekLower],
-      ["Greek (uppercase)", symbolGroups.greekUpper],
-      ["Arithmetic", symbolGroups.arithmeticOps],
-      ["Relations", symbolGroups.relations],
-      ["Set Theory", symbolGroups.setTheory],
-      ["Logic & Proof", symbolGroups.logicProof],
-      ["Calculus", symbolGroups.calculus],
-      ["Accents", symbolGroups.accents],
-      ["LargeMath", symbolGroups.largemath],
-      ["FootnoteMarks", symbolGroups.footnoteMarks]
-    ];
-    const groupButtonsDiv = document.getElementById("groupButtons");
 
-    symbolGroupList.forEach(([title, groupObj], index) => {
-        const btn = document.createElement("button");
-        btn.textContent = title;
-        btn.style.margin = "4px";
-        btn.onclick = () => openGroupModal(title, groupObj, index);
-        groupButtonsDiv.appendChild(btn);
+  /* -------------------------------------------------
+   * Sanity checks
+   * ------------------------------------------------- */
+  const toolbar = document.getElementById("symbolToolbar");
+
+  if (!toolbar) {
+    alert("ERROR: symbolToolbar div not found");
+    return;
+  }
+
+  if (!window.symbolGroups || Object.keys(window.symbolGroups).length === 0) {
+    alert("ERROR: window.symbolGroups is empty or undefined");
+    return;
+  }
+
+  console.log("Symbol subgroups detected:",
+    Object.keys(window.symbolGroups)
+  );
+
+  const icons = window.icons || {};
+  const groups = window.symbolGroups;
+
+  /* -------------------------------------------------
+   * Build toolbar buttons (MAIN WINDOW)
+   * ------------------------------------------------- */
+  Object.keys(groups).forEach(groupName => {
+    const btn = document.createElement("button");
+    btn.className = "symbol-toolbar-btn";
+
+    btn.innerHTML = `
+      <span class="group-icon">${icons[groupName] || "□"}</span>
+      <span class="group-title">${groupName}</span>
+    `;
+
+    btn.addEventListener("click", () => {
+      console.log("Toolbar clicked:", groupName);
+      openSubgroupModal(groupName, groups[groupName]);
     });
 
-    function openGroupModal(title, groupObj, idx) {
-        let modal = document.getElementById(`groupModal-${idx}`);
+    toolbar.appendChild(btn);
+  });
 
-        if (!modal) {
-            modal = document.createElement("div");
-            modal.className = "modal";
-            modal.id = `groupModal-${idx}`;
+  /* -------------------------------------------------
+   * Subgroup Modal (one per subgroup)
+   * ------------------------------------------------- */
+  function openSubgroupModal(groupName, symbols) {
+    let modal = document.getElementById(`symbol-modal-${groupName}`);
 
-            modal.innerHTML = `
-              <div class="modal-content">
-                <span class="close">&times;</span>
-                <h3 style="text-align:center;">${title}</h3>
-                <div class="symbol-grid" id="groupSymbols-${idx}"></div>
-              </div>
-            `;
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.className = "symbol-modal";
+      modal.id = `symbol-modal-${groupName}`;
 
-            document.body.appendChild(modal);
+      modal.innerHTML = `
+        <div class="symbol-modal-content">
+          <span class="symbol-modal-close">&times;</span>
+          <h3 style="text-align:center;">${groupName}</h3>
+          <div class="symbol-grid"></div>
+        </div>
+      `;
 
-            const closeBtn = modal.querySelector(".close");
-            closeBtn.onclick = () => modal.style.display = "none";
+      document.body.appendChild(modal);
 
-            window.addEventListener("click", (e) => {
-                if (e.target === modal) modal.style.display = "none";
-            });
+      const grid = modal.querySelector(".symbol-grid");
 
-            // Populate symbols ONCE
-            const container = modal.querySelector(`#groupSymbols-${idx}`);
-            addGroupSymbols(container, groupObj);
-        }
+      Object.entries(symbols).forEach(([latex, char]) => {
+        const item = document.createElement("div");
+        item.className = "symbol-item";
 
-        modal.style.display = "block";
-    }
-    /// Symbol bar End
-
-    const menuBtn = document.getElementById("menuBtn");
-
-    const modal = document.getElementById("classModal");
-    const closeBtn = document.querySelector(".close");
-    const Symbols = document.getElementById("Symbols");
-    const inputBox = document.getElementById("urlInput");
-
-    inputBox.addEventListener("input", () => {
-        if (liveMode) convertToUnicode();
-    });
-
-    menuBtn.onclick = () => {
-        Symbols.innerHTML = "";
-        buildSymbolModal();
-        modal.style.display = "block";
-    };
-
-    closeBtn.onclick = () => modal.style.display = "none";
-
-    window.onclick = (e) => {
-        if (e.target === modal) modal.style.display = "none";
-    };
-
-    function buildSymbolModal() {
-        // Unicode hex input
-        const unicodeDiv = document.createElement("div");
-        unicodeDiv.className = "unicode-input";
-        unicodeDiv.style.display = "flex";
-        unicodeDiv.style.flexDirection = "column";
-        unicodeDiv.style.alignItems = "center";
-        unicodeDiv.style.margin = "10px auto";
-        unicodeDiv.style.border = "2px solid #FCBA03";
-        unicodeDiv.innerHTML = `
-            <center><label>Insert Unicode (hex): </label></center>
-            <center><input id="unicodeCode" type="text" placeholder="e.g. 03B1">
-            <button id="unicodeInsert">Insert</button></center>
+        item.innerHTML = `
+          <span class="symbol-latex">${latex}</span>
+          <span class="symbol-char">${char}</span>
         `;
-        Symbols.appendChild(unicodeDiv);
 
-        document.getElementById("unicodeInsert").onclick = () => {
-            const code = document.getElementById("unicodeCode").value.trim();
-            if (!code) return;
+        item.addEventListener("click", () => {
+          if (typeof insertAtCursor === "function") {
+            insertAtCursor(latex);
+          } else {
+            console.warn("insertAtCursor() is not defined");
+          }
+        });
 
-            try {
-                const char = String.fromCodePoint(parseInt(code, 16));
-                insertAtCursor(char);
-                document.getElementById("unicodeCode").value = "";
-            } catch {
-                alert("Invalid Unicode code point!");
-            }
-        };
+        grid.appendChild(item);
+      });
 
-        addGroup("Greek (lowercase)", symbolGroups.greekLower);
-        addGroup("Greek (uppercase)", symbolGroups.greekUpper);
-        addGroup("Arithmetic", symbolGroups.arithmeticOps);
-        addGroup("Relations", symbolGroups.relations);
-        addGroup("Set Theory", symbolGroups.setTheory);
-        addGroup("Logic & Proof", symbolGroups.logicProof);
-        addGroup("Calculus", symbolGroups.calculus);
-        addGroup("Accents", symbolGroups.accents);
-        addGroup("LargeMath", symbolGroups.largemath);
-        addGroup("FootnoteMarks", symbolGroups.footnoteMarks);
+      // Close button
+      modal.querySelector(".symbol-modal-close").onclick = () => {
+        modal.style.display = "none";
+      };
+
+      // Click outside modal closes it
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) modal.style.display = "none";
+      });
     }
 
-    function addGroup(title, groupObj) {
-        const header = document.createElement("div");
-        header.className = "symbol-group";
-        header.textContent = title;
-        Symbols.appendChild(header);
+    modal.style.display = "flex";
+  }
 
-        for (const latex in groupObj) {
-            const item = document.createElement("div");
-            item.className = "symbol-item";
-            item.innerHTML = `
-              <span class="symbol-latex">${latex}</span>
-              <span class="symbol-char">${groupObj[latex]}</span>
-            `;
-            item.onclick = () => insertAtCursor(latex);
-            Symbols.appendChild(item);
-        }
-    }
 });

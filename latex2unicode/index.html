@@ -15,7 +15,6 @@
 <body>
   <h1 style="text-align:center; color:#FCBA03;">LaTeX → Unicode Converter</h1>
   <!------------------   Menu and Modal ------->
-  <div id="menuBtn" title="List of Symbols">☰</div>
   <div id="classModal" class="modal">
       <div class="modal-content">
           <span class="close">&times;</span>
@@ -24,20 +23,27 @@
       </div>
   </div>
   <!-- Unicode Insert Modal -->
-  <div id="groupButtons" style="text-align:center; margin-bottom:10px;"></div>
+  <!--div id="classModal" class="modal">
+    <span class="close">&times;</span>
+    <div id="Symbols"></div>
+  </div-->
   <!------------------------------------------->
   <!-- Full-width converter container -->
   <div class="keep-container fullwidth">
     <div class="course-note">
+      <div id="Symbols">
+        <div id="symbolToolbar"></div>
+      </div>
+      <hr>
       <button id="liveToggle" onclick="toggleLiveMode()">Live Mode: ON</button>
       <textarea id="urlInput" placeholder="Enter LaTeX, e.g. \frac{1}{2} + \mathbb{R}"></textarea>
       <button onclick="convertToUnicode()">Convert</button>
 
       <!------------------------------------------------------->
       <div class="align-controls">
-        <button onclick="setStatusAlign('left')">|====    |</button>
-        <button onclick="setStatusAlign('center')">|  ====  |</button>
-        <button onclick="setStatusAlign('right')">|    ====|</button>
+        <button onclick="setStatusAlign('left')">|====&nbsp&nbsp&nbsp&nbsp|</button>
+        <button onclick="setStatusAlign('center')">|&nbsp&nbsp====&nbsp&nbsp|</button>
+        <button onclick="setStatusAlign('right')">|&nbsp&nbsp&nbsp&nbsp====|</button>
       </div>
       <div id="status" >Output will appear here</div>
       <button onclick="copyUnicode()">Copy</button>

@@ -1,16 +1,55 @@
-.symbol-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 6px 10px;
+/**** Modal ****/
+#symbolToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  border-bottom: 2px solid #FCBA03;
 }
 
-#groupButtons {
+.symbol-toolbar-btn {
   display: flex;
-  flex-wrap: wrap;        /* allow wrapping on small screens */
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 10px;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
 }
+
+.symbol-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.symbol-modal-content {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  max-width: 700px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.symbol-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 8px;
+}
+
+.symbol-item {
+  border: 1px solid #ccc;
+  padding: 6px;
+  cursor: pointer;
+  text-align: center;
+}
+
+/**** Modal ****/
 
 .align-controls {
   display: flex;
