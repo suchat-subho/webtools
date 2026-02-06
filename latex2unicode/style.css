@@ -1,20 +1,24 @@
-/**** Modal ****/
+/* Toolbar container */
 #symbolToolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  display: flex;           /* row layout */
+  flex-wrap: wrap;         /* wrap to next line if too many buttons */
+  gap: 6px;                /* space between buttons */
   padding: 8px;
   border-bottom: 2px solid #FCBA03;
 }
 
+/* Toolbar buttons */
 .symbol-toolbar-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;                /* icon + title spacing */
   padding: 6px 10px;
+  font-size: 13px;
   cursor: pointer;
+  white-space: nowrap;      /* prevent text from breaking */
+  flex-shrink: 0;           /* prevent buttons from shrinking */
 }
-
+/* ================== Modal ================== */
 .symbol-modal {
   display: none;
   position: fixed;
@@ -27,29 +31,62 @@
   justify-content: center;
 }
 
-.symbol-modal-content {
-  background: white;
-  padding: 16px;
-  border-radius: 8px;
-  max-width: 700px;
-  max-height: 80vh;
-  overflow-y: auto;
+.symbol-modal-close {
+    position: absolute;       /* position relative to modal content */
+    top: 8px;                 /* small margin from top */
+    right: 12px;              /* small margin from right */
+    font-size: 20px;          /* larger for visibility */
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+    z-index: 10;              /* ensure it's above content */
 }
 
+.symbol-modal-content {
+  background: white;
+  padding: 12px;           /* slightly larger padding */
+  border-radius: 6px;
+  max-width: 700px;         /* increased width */
+  width: 90%;               /* responsive width */
+  max-height: 70vh;         /* reasonable height */
+  overflow-y: auto;         /* scroll if content exceeds height */
+}
+
+/* ================== Symbol Grid ================== */
 .symbol-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(4, 1fr); /* 4 columns */
+  gap: 6px;                             /* slightly larger gap */
 }
 
 .symbol-item {
   border: 1px solid #ccc;
   padding: 6px;
-  cursor: pointer;
+  font-size: 14px;
   text-align: center;
+  cursor: pointer;
+  border-radius: 4px;
+  background: #fefefe;
+  transition: 0.2s;
 }
 
-/**** Modal ****/
+.symbol-item:hover {
+  background: #fcf3d6;
+}
+
+/* LaTeX above symbol */
+.symbol-latex {
+  display: block;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.symbol-char {
+  display: block;
+  font-size: 18px;
+  margin-top: 2px;
+}
+/**** Modal End ****/
 
 .align-controls {
   display: flex;
