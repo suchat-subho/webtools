@@ -23,6 +23,8 @@
           <div id="Symbols" class="symbol-grid"></div>
       </div>
   </div>
+  <!-- Unicode Insert Modal -->
+  <div id="groupButtons" style="text-align:center; margin-bottom:10px;"></div>
   <!------------------------------------------->
   <!-- Full-width converter container -->
   <div class="keep-container fullwidth">
@@ -31,6 +33,12 @@
       <textarea id="urlInput" placeholder="Enter LaTeX, e.g. \frac{1}{2} + \mathbb{R}"></textarea>
       <button onclick="convertToUnicode()">Convert</button>
 
+      <!------------------------------------------------------->
+      <div class="align-controls">
+        <button onclick="setStatusAlign('left')">Left</button>
+        <button onclick="setStatusAlign('center')">Center</button>
+        <button onclick="setStatusAlign('right')">Right</button>
+      </div>
       <div id="status" >Output will appear here</div>
       <button onclick="copyUnicode()">Copy</button>
     </div>

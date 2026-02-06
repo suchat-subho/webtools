@@ -1,3 +1,11 @@
+///// <!---------UI -------->
+function setStatusAlign(align) {
+  const status = document.getElementById("status");
+  status.style.textAlign = align;
+}
+
+//////<!---------UI -------->
+
 const spacingCommands = {
     "\\quad":  "    ",      // 4 spaces
     "\\qquad": "        "   // 8 spaces
