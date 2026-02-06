@@ -10,6 +10,7 @@ const spacingCommands = {
     "\\quad":  "    ",      // 4 spaces
     "\\qquad": "        "   // 8 spaces
 };
+const spacingCommandsIcon="⇤ ⇥";
 
 
 // ================= LaTeX → Unicode Maps =================
@@ -21,12 +22,16 @@ const greekLower = {
   "\\sigma":"σ","\\tau":"τ","\\upsilon":"υ","\\phi":"φ","\\chi":"χ",
   "\\psi":"ψ","\\omega":"ω"
 };
+const greekLowerIcon = "δ";
 
 const greekUpper = {
   "\\Gamma":"Γ","\\Delta":"Δ","\\Theta":"Θ","\\Lambda":"Λ",
   "\\Xi":"Ξ","\\Pi":"Π","\\Sigma":"Σ","\\Phi":"Φ",
   "\\Psi":"Ψ","\\Omega":"Ω"
 };
+
+const greekUpperIcon = "Δ";
+
 
 const arithmeticOps = {
   "\\times":"×","\\div":"÷","\\pm":"±","\\mp":"∓",
