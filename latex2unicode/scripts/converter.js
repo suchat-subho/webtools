@@ -26,6 +26,7 @@ const spacingSubgroups = {
         "\\vdots": "⋮",
         "\\ldots": "…",
         "\\cdot": "·",
+        "\\cdots":"\u22EF",
         "\\\\" : "\u000A",
         "\\&":"\u0009",
     }
