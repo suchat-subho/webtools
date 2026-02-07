@@ -6,13 +6,8 @@ document.addEventListener("DOMContentLoaded", () => {
    * ------------------------------------------------- */
   const toolbar = document.getElementById("symbolToolbar");
 
-  if (!toolbar) {
-    alert("ERROR: symbolToolbar div not found");
-    return;
-  }
-
   if (!window.symbolGroups || Object.keys(window.symbolGroups).length === 0) {
-    alert("ERROR: window.symbolGroups is empty or undefined");
+    alert("ERROR: window.symbolGroups is empty or undefined. Please report to developper ");
     return;
   }
 
