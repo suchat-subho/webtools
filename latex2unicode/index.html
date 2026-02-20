@@ -6,51 +6,83 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>LaTeX → Unicode Converter</title>
-
-  <!-- Main site theme -->
   <link rel="stylesheet" href="../style.css">
-  <!-- Converter-specific styling -->
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <h1 style="text-align:center; color:#FCBA03;">LaTeX → Unicode Converter</h1>
-  <!------------------   Menu and Modal ------->
-  <div id="classModal" class="modal">
-      <div class="modal-content">
-          <span class="close">&times;</span>
-          <h3>Symbols</h3>
-          <div id="Symbols" class="symbol-grid"></div>
-      </div>
-  </div>
-  <!-- Unicode Insert Modal -->
-  <!--div id="classModal" class="modal">
-    <span class="close">&times;</span>
-    <div id="Symbols"></div>
-  </div-->
-  <!------------------------------------------->
-  <!-- Full-width converter container -->
-  <div class="keep-container fullwidth">
-    <div class="course-note">
-      <div id="Symbols">
-        <div id="symbolToolbar"></div>
-      </div>
-      <button id="liveToggle" onclick="toggleLiveMode()">Live Mode: ON</button>
-      <textarea id="urlInput" placeholder="Enter LaTeX, e.g. \frac{1}{2} + \mathbb{R}"></textarea>
-      <button onclick="convertToUnicode()">Convert</button>
 
-      <!------------------------------------------------------->
-      <div class="align-controls">
-        <button onclick="setStatusAlign('left')">|====&nbsp&nbsp&nbsp&nbsp|</button>
-        <button onclick="setStatusAlign('center')">|&nbsp&nbsp====&nbsp&nbsp|</button>
-        <button onclick="setStatusAlign('right')">|&nbsp&nbsp&nbsp&nbsp====|</button>
-      </div>
-      <div id="status" >Output will appear here</div>
-      <button onclick="copyUnicode()">Copy</button>
+<body>
+
+<h1 style="text-align:center; color:#FCBA03;">
+  LaTeX → Unicode Converter
+</h1>
+
+<div class="page-container">
+
+  <!------------------ Modal ------------------>
+  <div id="classModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>Symbols</h3>
+      <div id="Symbols" class="symbol-grid"></div>
     </div>
   </div>
+  <!------------------------------------------>
 
-  <!-- External JS logic -->
-  <script src="scripts/converter.js"></script>
-  <script src="scripts/modal.js"></script>
+  <!-- ========= ROW 1: Symbol Toolbar ========= -->
+  <div class="toolbar-row">
+    <div id="symbolToolbar"></div>
+  </div>
+
+  <!-- ========= ROW 2: Two Columns ========= -->
+  <div class="main-grid">
+
+    <!-- LEFT COLUMN -->
+    <div>
+      <button id="liveToggle" onclick="toggleLiveMode()">
+        Live Mode: ON
+      </button>
+
+      <textarea
+        id="urlInput"
+        placeholder="Enter LaTeX, e.g. \frac{1}{2} + \mathbb{R}">
+      </textarea>
+
+      <button onclick="convertToUnicode()">Convert</button>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+
+      <div class="align-controls">
+        <button class="alignment-btn" onclick="setStatusAlign('left')">|====&nbsp&nbsp&nbsp&nbsp|</button>
+        <button class="alignment-btn" onclick="setStatusAlign('center')">|&nbsp&nbsp====&nbsp&nbsp|</button>
+        <button class="alignment-btn" onclick="setStatusAlign('right')">|&nbsp&nbsp&nbsp&nbsp====|</button>
+      </div>
+
+      <div id="status">Output will appear here</div>
+
+      <div class="note">Ctrl+c to Copy Output<br>
+        Enter to convert</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* Ctrl + C → copy #status */
+document.addEventListener("copy", function (e) {
+  const statusDiv = document.getElementById("status");
+  if (!statusDiv) return;
+
+  e.preventDefault();
+  e.clipboardData.setData("text/plain", statusDiv.innerText);
+});
+
+/* Ctrl + V → paste into #urlInput */
+</script>
+
+<script src="scripts/converter.js"></script>
+<script src="scripts/modal.js"></script>
+
 </body>
 </html>

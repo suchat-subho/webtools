@@ -1,3 +1,59 @@
+
+/* ===== Layout ===== */
+.page-container {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.note {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-top: 8px;
+
+  background: rgba(252, 186, 3, 0.15); /* soft highlight */
+  color: #FCBA03;
+
+  border: 1px dashed #FCBA03;
+  border-radius: 6px;
+
+  font-size: 14px;
+  font-family: system-ui, sans-serif;
+}
+
+/* Row 1 */
+.toolbar-row {
+  width: 100%;
+  margin-bottom: 10px;
+  background: #000000;
+}
+
+/* Row 2 */
+.main-grid {
+  display: grid;
+  grid-template-columns: 60% 40%;
+  background: #000000;
+}
+
+textarea {
+  width: 100%;
+  min-height: 120px;
+}
+
+#status {
+  display: inline-block;
+  min-height: 120px;
+  padding: 8px;
+  margin-top: 10px;
+  background: #000000;
+  color: #00FF00;
+  border: 1px dashed #FCBA03;
+  border-radius: 6px;
+  font-family: "JetBrains Mono", monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
 /* Toolbar container */
 #symbolToolbar {
   display: flex;           /* row layout */
@@ -98,8 +154,8 @@
 .align-controls button {
   padding: 6px 14px;
   font-size: 14px;
-  background-color: #333;
-  color: #FCBA03;
+  background-color: #ff7b00;
+  color: #FEFEFE;
   border: 1px solid #FCBA03;
   border-radius: 6px;
   cursor: pointer;
@@ -112,10 +168,6 @@
 
 
 
-#status {
-    font-family: "JetBrains Mono", monospace;
-    white-space: pre-wrap;
-}
 #menuBtn {
   position: fixed;
   top: 15px;
@@ -207,7 +259,7 @@
 
 #urlInput:focus {
   outline: none;
-  box-shadow: 0 0 8px rgba(252, 186, 3, 0.6);
+  box-shadow: 0 0 8px rgba(252,186,3,0.2);
 }
 
 button {
@@ -232,18 +284,6 @@ canvas {
   padding: 10px;
   margin: 20px auto;
   cursor: zoom-in;
-}
-
-#status {
-  background: rgba(252, 186, 3, 0.2);
-  border: 1px dashed #FCBA03;
-  color:white;
-  padding: 8px;
-  border-radius: 6px;
-  display: inline-block;
-  margin-top: 10px;
-  word-break: break-all;
-  font-family: Garamond, serif;
 }
 
 /* Modal overlay */
