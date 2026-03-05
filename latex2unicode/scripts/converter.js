@@ -137,22 +137,19 @@ const largemathSubgroups = {
   icon: "⎲",
   symbols: {
     // Sum
-    "\\sumtop": "⎲","\\sumbot": "⎳",
-
-    // Curly braces
-    "\\lbraceTop": "⎧","\\lbraceMid": "⎨","\\lbraceBot": "⎩",
-    "\\rbraceTop": "⎫","\\rbraceMid": "⎬","\\rbraceBot": "⎭",
-
-    // Square brackets
-    "\\lbracketTop": "⎡","\\lbracketMid": "⎢","\\lbracketBot": "⎣",
-    "\\rbracketTop": "⎤","\\rbracketMid": "⎥","\\rbracketBot": "⎦",
+    "\\sumTop": "⎲","\\sumBot": "⎳",
+    // Integrals
+    "\\intTop": "⌠","\\intBot": "⌡",
 
     // Parentheses
     "\\lparenTop": "⎛","\\lparenMid": "⎜","\\lparenBot": "⎝",
     "\\rparenTop": "⎞","\\rparenMid": "⎟","\\rparenBot": "⎠",
-
-    // Integrals
-    "\\inttop": "⌠","\\intbot": "⌡",
+    // Curly braces
+    "\\lbraceTop": "⎧","\\lbraceMid": "⎨","\\lbraceBot": "⎩",
+    "\\rbraceTop": "⎫","\\rbraceMid": "⎬","\\rbraceBot": "⎭",
+    // Square brackets
+    "\\lbracketTop": "⎡","\\lbracketMid": "⎢","\\lbracketBot": "⎣",
+    "\\rbracketTop": "⎤","\\rbracketMid": "⎥","\\rbracketBot": "⎦",
   }
 };
 //// All Simple symbols
