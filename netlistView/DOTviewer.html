@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DOT Graph Viewer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="left-pane">
+      <h2>DOT Graph Input</h2>
+      <textarea id="netlistBox" spellcheck="false"></textarea>
+      <div id="error-msg" style="display:none; margin-top:8px; color:#c0392b; font-size:13px; font-family:monospace;"></div>
+      <div id="buttons">
+        <button onclick="renderCircuit()">Render</button>
+        <button onclick="resetExample()">Reset</button>
+        <button onclick="exportPNG()">Export PNG</button>
+      </div>
+    </div>
+    <div id="right-pane">
+      <canvas id="circuitCanvas"></canvas>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/@viz-js/viz@3.2.4/lib/viz-standalone.js"></script>
+  <script src="graph.js"></script>
+</body>
+</html>

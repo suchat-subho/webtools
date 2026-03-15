@@ -33,17 +33,17 @@ function parseNetlist(text) {
   const lines = text.split("\n").map(l => l.trim()).filter(l => l && !l.startsWith("*"));
   const elements = [];
   const nodes = new Set();
-
+  var parts="";
   for (const line of lines) {
-    const parts = line.split(/\s+/);
+    parts = line.split(/\s+/);
     if (parts.length < 3) continue;
-    const [name, n1, n2, ...rest] = parts;
+    const [ID, n1, n2, ...rest] = parts;
     const value = rest.join(" ");
     elements.push({ name, n1, n2, value });
     nodes.add(n1);
     nodes.add(n2);
   }
-
+console.log(nodes);
   // Ground node at last
   const nodeList = Array.from(nodes);
   if (nodeList.includes("0")) {
