@@ -92,6 +92,19 @@ function netlistToDot(netlist, opts) {
   /* ── Model-type keywords to skip (not nets) ── */
   var MODEL_KW = new Set(['NPN','PNP','NMOS','PMOS','NJF','PJF']);
 
+  /* ── Expected terminal counts (nets only) per prefix ── */
+  var TERM_COUNT = { R:2, C:2, L:2, V:2, I:2, D:2, Q:3, M:3, J:3 };
+  // U and X are variable — no fixed count
+
+  /* ── Pre-pass: collect user-defined .model and .subckt names ── */
+  var userLines = netlist.split(/\r?\n/);
+  userLines.forEach(function(line) {
+    var t = line.trim();
+    // .model <name> <type> ...   or   .subckt <name> ...
+    var m = t.match(/^\.(model|subckt)\s+(\S+)/i);
+    if (m) MODEL_KW.add(m[2].toUpperCase());
+  });
+
   /* ── Value-token test ── */
   function isValue(token) {
     if (token === '0') return false;                          // bare 0 = GND net
@@ -150,11 +163,13 @@ function netlistToDot(netlist, opts) {
       netTokens  = xNets;
       valueToken = tokens.slice(xi).join(' ');
     } else {
+      var maxNets = TERM_COUNT[prefix] || 99;  // cap at known terminal count
       var i = 1;
       while (i < tokens.length) {
         var t = tokens[i];
-        if (MODEL_KW.has(t.toUpperCase()))              { i++; continue; } // skip model names
-        if (isValue(t) && netTokens.length >= 2)        { valueToken = tokens.slice(i).join(' '); break; }
+        if (MODEL_KW.has(t.toUpperCase()))           { i++; continue; } // skip model names
+        if (netTokens.length >= maxNets)             { valueToken = tokens.slice(i).join(' '); break; }
+        if (isValue(t) && netTokens.length >= 2)     { valueToken = tokens.slice(i).join(' '); break; }
         netTokens.push(t);
         i++;
       }
@@ -170,26 +185,66 @@ function netlistToDot(netlist, opts) {
 
     var termLabels = TERMINAL_LABELS[prefix] || normNets.map(function(_, idx) { return String(idx + 1); });
 
-    /* ── Build record label  { <p0> A | RefDes\nValue | <p1> B } ── */
+    /* ── Build record label ──────────────────────────────────────────
+       For 2-terminal components (R, C, L, V, I, D):
+         { <p0> A | RefDes\nValue | <p1> B }
+         — flat row, one port each side of the centre cell
+
+       For 3+ terminal components (Q, M, U, X …):
+         { {<p0> C\n|<p1> B\n|<p2> E} | RefDes\nValue }   (left ports)
+         or split left/right:
+         { {<p0> 1|<p1> 2|<p2> 3|<p3> 4} | U1\n555 | {<p4> 5|<p5> 6|<p6> 7|<p7> 8} }
+
+       The centre text uses DOT's \n (a literal backslash+n in the DOT
+       source, which Graphviz interprets as a line break).  We must NOT
+       pass it through escRec because escRec would double-escape the
+       backslash.  All other label text goes through escRec normally.
+    ─────────────────────────────────────────────────────────────────── */
+
+    // DOT newline inside a label = the two chars  \  n  in the file.
+    // In a JS string that is written as  '\\n'.
+    var DOT_NL = '\\n';
+
+    var centre = valueToken
+      ? (escRec(refdes) + DOT_NL + escRec(valueToken))
+      : (subcktName ? (escRec(refdes) + DOT_NL + escRec(subcktName)) : escRec(refdes));
+
     var half       = Math.ceil(termLabels.length / 2);
     var leftTerms  = termLabels.slice(0, half);
     var rightTerms = termLabels.slice(half);
 
-    var centre = valueToken
-      ? (refdes + '\\n' + valueToken)
-      : (subcktName ? (refdes + '\\n' + subcktName) : refdes);
+    var recordLabel;
 
-    var leftCells  = leftTerms.map(function(lbl, idx) {
-      return '<p' + idx + '> ' + escRec(lbl);
-    }).join(' | ');
+    if (termLabels.length <= 2) {
+      /* Simple 2-terminal: flat  { <p0> A | Centre | <p1> B } */
+      var lc = leftTerms.map(function(lbl, idx) {
+        return '<p' + idx + '> ' + escRec(lbl);
+      }).join(' | ');
+      var rc = rightTerms.map(function(lbl, idx) {
+        return '<p' + (half + idx) + '> ' + escRec(lbl);
+      }).join(' | ');
 
-    var rightCells = rightTerms.map(function(lbl, idx) {
-      return '<p' + (half + idx) + '> ' + escRec(lbl);
-    }).join(' | ');
+      recordLabel = rc
+        ? ('{ ' + lc + ' | ' + centre + ' | ' + rc + ' }')
+        : ('{ ' + lc + ' | ' + centre + ' }');
 
-    var recordLabel = rightCells
-      ? ('{ ' + leftCells + ' | ' + escRec(centre) + ' | ' + rightCells + ' }')
-      : ('{ ' + leftCells + ' | ' + escRec(centre) + ' }');
+    } else {
+      /* Multi-terminal IC: vertical port columns left and right of centre
+         { { <p0> 1 | <p1> 2 | ... } | Centre | { <p4> 5 | ... } }
+         Each sub-brace makes a vertical column in Graphviz record layout. */
+      var leftCol = leftTerms.map(function(lbl, idx) {
+        return '<p' + idx + '> ' + escRec(lbl);
+      }).join(' | ');
+
+      if (rightTerms.length > 0) {
+        var rightCol = rightTerms.map(function(lbl, idx) {
+          return '<p' + (half + idx) + '> ' + escRec(lbl);
+        }).join(' | ');
+        recordLabel = '{ { ' + leftCol + ' } | ' + centre + ' | { ' + rightCol + ' } }';
+      } else {
+        recordLabel = '{ { ' + leftCol + ' } | ' + centre + ' }';
+      }
+    }
 
     compNodes.set(refdes, {
       recordLabel : recordLabel,

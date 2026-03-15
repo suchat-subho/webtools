@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Circuit Netlist Viewer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="left-pane">
+      <h2>Netlist Input</h2>
+      <textarea id="netlistBox" spellcheck="false"></textarea>
+      <div id="buttons">
+        <button onclick="renderCircuit()">Render</button>
+        <button onclick="resetExample()">Reset</button>
+        <button onclick="exportPNG()">Export PNG</button>
+      </div>
+    </div>
+
+    <div id="right-pane">
+      <canvas id="circuitCanvas" width="1200" height="800"></canvas>
+    </div>
+  </div>
+
+  <script src="scripts/netlist.js"></script>
+</body>
+</html>
