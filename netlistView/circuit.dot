@@ -1,0 +1,55 @@
+graph Netlist {
+  rankdir=LR;
+  node [fontname="Arial", fontsize=11];
+  edge [fontname="Arial", fontsize=10];
+
+  // Net nodes
+  "N001" [label="N001", shape=ellipse];
+  "GND" [label="GND", shape=triangle, orientation=180];
+  "N002" [label="N002", shape=ellipse];
+  "N003" [label="N003", shape=ellipse];
+  "N004" [label="N004", shape=ellipse];
+  "N005" [label="N005", shape=ellipse];
+  "N006" [label="N006", shape=ellipse];
+  "N007" [label="N007", shape=ellipse];
+  "N008" [label="N008", shape=ellipse];
+  "N009" [label="N009", shape=ellipse];
+  "N010" [label="N010", shape=ellipse];
+  "N011" [label="N011", shape=ellipse];
+  "N012" [label="N012", shape=ellipse];
+
+  // Component nodes
+  "V1" [label="{ <p0> + | V1\\nDC 5 | <p1> - }", shape=record, style="filled"];
+  "R1" [label="{ <p0> p | R1\\n10k | <p1> n }", shape=record];
+  "C1" [label="{ <p0> p | C1\\n10u | <p1> n }", shape=record];
+  "Q1" [label="{ <p0> C | <p1> B | Q1 | <p2> E }", shape=record];
+  "R2" [label="{ <p0> p | R2\\n4.7k | <p1> n }", shape=record];
+  "L1" [label="{ <p0> p | L1\\n2mH | <p1> n }", shape=record];
+  "D1" [label="{ <p0> A | D1\\n1N4148 | <p1> K }", shape=record];
+  "U1" [label="{ <p0> 1 | <p1> 2 | <p2> 3 | <p3> 4 | U1\\n555 | <p4> 5 | <p5> 6 | <p6> 7 | <p7> 8 }", shape=record, style="filled"];
+
+  // Connections
+  "N001" -- "V1":"p0";
+  "GND" -- "V1":"p1";
+  "N001" -- "R1":"p0";
+  "N002" -- "R1":"p1";
+  "N002" -- "C1":"p0";
+  "GND" -- "C1":"p1";
+  "N002" -- "Q1":"p0";
+  "N003" -- "Q1":"p1";
+  "N004" -- "Q1":"p2";
+  "N003" -- "R2":"p0";
+  "GND" -- "R2":"p1";
+  "N004" -- "L1":"p0";
+  "GND" -- "L1":"p1";
+  "N004" -- "D1":"p0";
+  "N002" -- "D1":"p1";
+  "N005" -- "U1":"p0";
+  "N006" -- "U1":"p1";
+  "N007" -- "U1":"p2";
+  "N008" -- "U1":"p3";
+  "N009" -- "U1":"p4";
+  "N010" -- "U1":"p5";
+  "N011" -- "U1":"p6";
+  "N012" -- "U1":"p7";
+}
