@@ -11,7 +11,8 @@ let LOG_LEVEL = 2;
 document.getElementById('logLevel').addEventListener('change', setLogLevel);
 document.getElementById('undoButton').addEventListener('click', undo);
 document.getElementById('loadButton').addEventListener('click', loadFromText);
-document.getElementById('checkButton').addEventListener('click', checkGrid);
+document.getElementById("checkButton").addEventListener("click", check);
+//document.getElementById('checkButton').addEventListener('click', checkGrid);
 
 function log(level, ...args) {
   if(level <= LOG_LEVEL) console.log(...args);
@@ -22,7 +23,39 @@ function setLogLevel() {
   log(2, 'Log level:', LOG_LEVEL);
 }
 
+function createColHeader() {
+  const colHeader = document.getElementById('grid-col-header');
+  colHeader.innerHTML = '';
+
+  const tr = document.createElement('tr');
+
+  for (let j = 0; j < SIZE; j++) {
+    const td = document.createElement('td');
+    td.textContent = j + 1;
+    tr.appendChild(td);
+  }
+
+  colHeader.appendChild(tr);
+}
+
+function createRowHeader() {
+  const rowHeader = document.getElementById('grid-row-header');
+  rowHeader.innerHTML = '';
+
+  for (let i = 0; i < SIZE; i++) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+
+    td.textContent = i + 1;
+
+    tr.appendChild(td);
+    rowHeader.appendChild(tr);
+  }
+}
+
 function createGrid() {
+  createRowHeader();
+  createColHeader();
   grid.innerHTML = '';
 
   for (let i = 0; i < SIZE; i++) {
@@ -172,9 +205,152 @@ function updateTextbox() {
 
   document.getElementById('gridInput').value = output;
 }
+function clearHighlights() {
+  for (let i = 0; i < SIZE; i++) {
+    for (let j = 0; j < SIZE; j++) {
+      const td = grid.rows[i].cells[j];
+      td.classList.remove("error-cell");
+    }
+  }
+}
 
-function checkGrid() {
-  const current = document.getElementById('gridInput').value;
-  log(2, 'Check button clicked. Current grid + pool:\n', current);
-  alert('Check complete! Open console for details.');
+function highlightCell(row, col) {
+  alert(`Issue at ${row} , ${col}`);
+  const td = grid.rows[row].cells[col];
+  td.classList.add("error-cell");
+}
+
+function check() {
+    const el = document.getElementById("gridInput");
+    if (!el) {
+        alert("Input not found");
+        return;
+    }
+
+    clearHighlights();
+
+    let raw = el.value;
+
+    // Remove tokens
+    let input = raw.replace(/<[^>]*>/g, "").trim();
+
+    // Parse TSV
+    const matrix = input.split("\n").map(row =>
+        row.split("\t").map(cell => cell.trim())
+    );
+
+    const ROWS = matrix.length;
+    const COLS = matrix[0].length;
+
+    let hasIncomplete = false;
+
+    // =========================
+    // ✅ ROW CHECK
+    // =========================
+    for (let i = 0; i < ROWS; i++) {
+        let expr = [];
+
+        for (let j = 0; j < COLS; j++) {
+            const cell = matrix[i][j];
+
+            if (cell === "." || cell === "B") hasIncomplete = true;
+
+            if (cell === ".") {
+                expr = [];
+                continue;
+            }
+
+            expr.push(cell);
+
+            if (cell === "=") {
+                const leftArr = expr.slice(0, -1);
+                const right = matrix[i][j + 1];
+
+                if (!right || right === "." || right === "B" || leftArr.includes("B")) {
+                    hasIncomplete = true;
+                    expr = [];
+                    continue;
+                }
+
+                try {
+                    const result = eval(leftArr.join("").replace(/x/g, "*"));
+
+                    if (Number(result) !== Number(right)) {
+                        console.log("❌ Row Error:", leftArr.join(" "), "=", right);
+                        highlightCell(i, j);
+                        alert(`Row issue at ${String.fromCharCode(65 + j)}${i + 1}`);
+                        return;
+                    }
+
+                } catch {
+                    highlightCell(i, j);
+                    alert(`Row issue at ${String.fromCharCode(65 + j)}${i + 1}`);
+                    return;
+                }
+
+                expr = [];
+            }
+        }
+    }
+
+    // =========================
+    // ✅ COLUMN CHECK
+    // =========================
+    for (let j = 0; j < COLS; j++) {
+        let expr = [];
+
+        for (let i = 0; i < ROWS; i++) {
+            const cell = matrix[i][j];
+
+            if (cell === "." || cell === "B") hasIncomplete = true;
+
+            if (cell === ".") {
+                expr = [];
+                continue;
+            }
+
+            expr.push(cell);
+
+            if (cell === "=") {
+                const leftArr = expr.slice(0, -1);
+                const right = (i + 1 < ROWS) ? matrix[i + 1][j] : null;
+
+                if (!right || right === "." || right === "B" || leftArr.includes("B")) {
+                    hasIncomplete = true;
+                    expr = [];
+                    continue;
+                }
+
+                try {
+                    const result = eval(leftArr.join("").replace(/x/g, "*"));
+
+                    if (Number(result) !== Number(right)) {
+                        console.log("❌ Col Error:", leftArr.join(" "), "=", right);
+
+                        highlightCell(i, j);      // "=" cell
+                        highlightCell(i + 1, j);  // result cell
+
+                        //alert(`Column issue at ${String.fromCharCode(65 + j)}${i + 1}`);
+                        return;
+                    }
+
+                } catch {
+                    highlightCell(i, j);
+                    //alert(`Column issue at ${String.fromCharCode(65 + j)}${i + 1}`);
+                    return;
+                }
+
+                expr = [];
+            }
+        }
+    }
+
+    // =========================
+    // ✅ FINAL STATUS
+    // =========================
+    if (!hasIncomplete) {
+        alert("Completed");
+    } else {
+        alert("No errors so far");
+    }
 }
