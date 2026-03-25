@@ -1,4 +1,4 @@
-const SIZE = 11;
+let SIZE = 11;
 const grid = document.getElementById('grid');
 const poolDiv = document.getElementById('pool');
 
@@ -8,11 +8,18 @@ let draggedToken = null;
 let LOG_LEVEL = 2;
 
 // Event listeners
-document.getElementById('logLevel').addEventListener('change', setLogLevel);
+//document.getElementById('logLevel').addEventListener('change', setLogLevel);
 document.getElementById('undoButton').addEventListener('click', undo);
 document.getElementById('loadButton').addEventListener('click', loadFromText);
 document.getElementById("checkButton").addEventListener("click", check);
+document.getElementById('setsize').addEventListener('change', setGamesize);
 //document.getElementById('checkButton').addEventListener('click', checkGrid);
+
+function setGamesize() {
+  SIZE = parseInt(document.getElementById('setsize').value);
+  alert("ChangeSize="+SIZE);
+  createGrid();
+}
 
 function log(level, ...args) {
   if(level <= LOG_LEVEL) console.log(...args);
