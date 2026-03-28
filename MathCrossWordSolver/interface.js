@@ -13,11 +13,12 @@ document.getElementById('undoButton').addEventListener('click', undo);
 document.getElementById('loadButton').addEventListener('click', loadFromText);
 document.getElementById("checkButton").addEventListener("click", check);
 document.getElementById('setsize').addEventListener('change', setGamesize);
+document.getElementById('setsize').addEventListener('click', setGamesize);
 //document.getElementById('checkButton').addEventListener('click', checkGrid);
 
 function setGamesize() {
   SIZE = parseInt(document.getElementById('setsize').value);
-  alert("ChangeSize="+SIZE);
+  //alert("ChangeSize="+SIZE);
   createGrid();
 }
 
@@ -222,8 +223,9 @@ function clearHighlights() {
 }
 
 function highlightCell(row, col) {
-  alert(`Issue at ${row} , ${col}`);
-  const td = grid.rows[row].cells[col];
+  let val=grid.rows[row].cells[col];
+  alert(`Issue at [${row} , ${col}]: Value=${val}`);
+  //const td = grid.rows[row].cells[col];
   td.classList.add("error-cell");
 }
 
@@ -260,7 +262,7 @@ function check() {
         for (let j = 0; j < COLS; j++) {
             const cell = matrix[i][j];
 
-            if (cell === "." || cell === "B") hasIncomplete = true;
+            if (cell === "B") hasIncomplete = true;
 
             if (cell === ".") {
                 expr = [];
@@ -309,7 +311,7 @@ function check() {
         for (let i = 0; i < ROWS; i++) {
             const cell = matrix[i][j];
 
-            if (cell === "." || cell === "B") hasIncomplete = true;
+            if (cell === "B") hasIncomplete = true;
 
             if (cell === ".") {
                 expr = [];
@@ -351,12 +353,47 @@ function check() {
             }
         }
     }
+    // =========================
+    // ✅ BLANK vs TOKEN CHECK
+    // =========================
+    let gameMatrix = document.getElementById('gridInput').value.trim();
+
+    // count blanks
+    let blankCount = gameMatrix.split(/\s+/).filter(x => x === 'B').length;
+
+    // extract token pool from <...>
+    let tokenMatch = raw.match(/<([^>]*)>/);
+    let tokens = [];
+
+    if (tokenMatch) {
+        //tokens = tokenMatch[1].trim().split(/\s+/);
+        tokens = (tokenMatch && tokenMatch[1].trim())? tokenMatch[1].trim().split(/\s+/): [];
+    }
+
+    // count remaining tokens (ignore operators if needed)
+    let tokenCount = tokens.length;
+    //alert("tokens:[" &tokenMatch.join(', ')&"]");
+    console.log("Blanks:", blankCount, "Tokens:", tokenCount);
+
+    // check mismatch
+    if (blankCount !== tokenCount) {
+        alert(`Mismatch: ${blankCount} blanks but ${tokenCount} tokens`);
+        return;
+    }
 
     // =========================
     // ✅ FINAL STATUS
     // =========================
+    //let gameMatrix=document.getElementById('gridInput').value.trim();
+    if (gameMatrix.includes('B')) {
+      console.log("Blank cells exist:");
+    } else{
+      //alert("All cells are filled");
+      hasIncomplete=false;
+      console.log("No blank cells");
+    }
     if (!hasIncomplete) {
-        alert("Completed");
+        alert("Game Completed");
     } else {
         alert("No errors so far");
     }
