@@ -1,3 +1,7 @@
+.main {
+  flex: 1; /* pushes footer down */
+}
+
 /* Layout */
 body {
   margin: 0;
@@ -6,6 +10,7 @@ body {
   height: 100vh;
   background: #eef3f7;
 }
+
 
 .sidebar {
   width: 300px;
