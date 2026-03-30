@@ -222,11 +222,24 @@ function clearHighlights() {
   }
 }
 
+function getCellValue(row, col) {
+  let tab= document.getElementById('grid');
+  console.log("Table:"& tab.innerHTML);
+  let cell = tab.rows[row].cells[col];
+  let input = cell.querySelector("input");
+  if (!input) return null; // safety
+  return input.value; // actual content
+}
+
 function highlightCell(row, col) {
   let val=grid.rows[row].cells[col];
-  alert(`Issue at [${row} , ${col}]: Value=${val.innerText}`);
+  let cell = grid.rows[row].cells[col];
+  cell.classList.add("error-cell");
+
+  //alert(`Issue at [${row+1} , ${col+1}]: Value=\"${getCellValue(row, col)}\"`);
+  //console.log("Grid["& row &","& col &"] -> "&${getCellValue(row, col));
   //const td = grid.rows[row].cells[col];
-  td.classList.add("error-cell");
+  //td.classList.add("error-cell");
 }
 
 function check() {
@@ -287,13 +300,13 @@ function check() {
                     if (Number(result) !== Number(right)) {
                         console.log("❌ Row Error:", leftArr.join(" "), "=", right);
                         highlightCell(i, j);
-                        alert(`Row issue at ${String.fromCharCode(65 + j)}${i + 1}`);
+                        alert(`Row issue at [${j+1},${i + 1}]->\"${getCellValue(i,j)}\"`);
                         return;
                     }
 
                 } catch {
                     highlightCell(i, j);
-                    alert(`Row issue at ${String.fromCharCode(65 + j)}${i + 1}`);
+                    alert(`Row issue at [${j+1},${i + 1}]-> \"${getCellValue(i,j)}\"`);
                     return;
                 }
 
