@@ -224,7 +224,7 @@ function clearHighlights() {
 
 function highlightCell(row, col) {
   let val=grid.rows[row].cells[col];
-  alert(`Issue at [${row} , ${col}]: Value=${val}`);
+  alert(`Issue at [${row} , ${col}]: Value=${val.innerText}`);
   //const td = grid.rows[row].cells[col];
   td.classList.add("error-cell");
 }
