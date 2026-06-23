@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Game-Instance</title>
+
+<style>
+body {
+    font-family: Arial;
+    margin: 20px;
+}
+
+.container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+/* Left pane (image) */
+.left-pane {
+    width: 251px;
+}
+
+/* Fixed image size */
+.left-pane img {
+    width: 251px;
+    height: 520px;
+    object-fit: contain;
+    border: 1px solid #ccc;
+}
+
+/* Right pane */
+.right-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+textarea {
+    width: 100%;
+    height: 320px;
+    font-family: monospace;
+}
+
+pre {
+    background: #f4f4f4;
+    padding: 10px;
+    margin-top: 10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h2>Game-Instance-G3</h2>
+
+<div class="container">
+
+    <!-- LEFT: Image -->
+    <div class="left-pane">
+        <img src="ss/g3.drawio.png" alt="Game Instance">
+    </div>
+
+    <!-- RIGHT: TSV -->
+    <div class="right-pane">
+
+        <textarea id="tsvInput">
+.   .   .   .   B   +   B   =   19  .   4
+.   .   .   .   .   .   +   .   B   .   x
+.   .   .   .   .   .   B   /   10  =   B
+.   .   .   .   .   .   =   .   =   .   =
+.   .   .   .   90  B   81  =   9   .   B
+.   .   .   .   B   .   .   .   .   .   .
+12  .   13  .   18  B   B   =   79  .   B
++   .   +   .   =   .   +   .   -   .   +
+43  +   B   =   B   .   B   +   B   =   B
+=   .   =   .   .   .   =   .   =   .   =
+B   .   B   .   B   +   66  =   74  .   77
+
+<5 5 7 8 8 10 11 28 29 42 55 61 67 70 72 + - - ->
+        </textarea>
+
+        <pre id="tsvOutput"></pre>
+
+    </div>
+
+</div>
+
+<br>
+
+<button onclick="renderTSV()">Render</button>
+<button onclick="copyTSV()">Copy TSV</button>
+
+<script>
+function renderTSV() {
+    const input = document.getElementById("tsvInput").value;
+    document.getElementById("tsvOutput").textContent = input;
+}
+
+function copyTSV() {
+    const text = document.getElementById("tsvInput").value;
+    navigator.clipboard.writeText(text);
+    alert("TSV copied!");
+}
+
+// Initial render
+renderTSV();
+</script>
+
+</body>
+</html>
